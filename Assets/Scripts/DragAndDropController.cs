@@ -6,13 +6,16 @@ public class DragAndDropController : MonoBehaviour
 {
     [SerializeField] private RayProvider _rayProvider;
     [SerializeField] private RectTransform _dragContainer;
+    [SerializeField, Min(0f)] private float _holdTimeToDrag = 0.25f;
+    [SerializeField, Min(0f)] private float _holdAllowedOffset = 30f;
     
     private IDraggableSource _draggableSource;
     private GameObject _draggableGhost;
     
-    private bool _isWaitingDragging;
+    private bool _isHolding;
     private bool _isDragging;
-    private float _timeToDrag;
+    private float _holdTime;
+    private Vector2 _startMousePosition;
     
     private readonly CompositeDisposable _disposables = new();
     
@@ -46,41 +49,51 @@ public class DragAndDropController : MonoBehaviour
 
     private void Update()
     {
-        if (!_isWaitingDragging)
+        if (!_isHolding)
             return;
         
-        _timeToDrag += Time.deltaTime;
-        if (_timeToDrag < 1f) 
+        var holdOffset = Vector2.Distance(_startMousePosition, Input.mousePosition);
+        if (holdOffset > _holdAllowedOffset)
+        {
+            _holdTime = 0f;
+            _isHolding = false;
+            _draggableSource = null;
+            return;
+        }
+        
+        _holdTime += Time.deltaTime;
+        if (_holdTime < _holdTimeToDrag) 
             return;
         
-        _timeToDrag = 0f;
+        _holdTime = 0f;
         _isDragging = true;
-        _isWaitingDragging = false;
+        _isHolding = false;
         _draggableGhost = _draggableSource.GetDraggableGhost();
         _draggableGhost.transform.SetParent(_dragContainer);
     }
 
     private void OnPointerDown()
     {
+        _startMousePosition = Input.mousePosition;
         var pointerData = new PointerEventData(EventSystem.current) 
         {
-            position = Input.mousePosition
+            position = _startMousePosition
         };
         
         if (_rayProvider.TryGetHit<IDraggableSource>(pointerData, out var draggable))
         {
             _draggableSource = draggable;
-            _isWaitingDragging = true;
+            _isHolding = true;
         }
     }
     
     private void OnPointerUp()
     {
-        if (_isWaitingDragging)
+        if (_isHolding)
         {
-            _isWaitingDragging = false;
+            _isHolding = false;
             _draggableSource = null;
-            _timeToDrag = 0f;
+            _holdTime = 0f;
         }
     }
     

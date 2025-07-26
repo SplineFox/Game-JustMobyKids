@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -19,7 +18,11 @@ public class ScrollArea : MonoBehaviour
 
     private void OnDestroy()
     {
-        throw new NotImplementedException();
+        foreach (var item in items)
+        {
+            item.DragBegin -= OnDragBegin;
+            item.DragEnd -= OnDragEnd;
+        }
     }
 
     private void OnDragBegin()

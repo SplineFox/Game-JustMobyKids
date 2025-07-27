@@ -41,7 +41,6 @@ public class DropTarget : MonoBehaviour, IDropTarget
         
         var position = last.RectTransform.localPosition;
         var xPosOffset = Random.Range(-1f, 1f) * (width / 2f);
-        Debug.Log(xPosOffset);
         
         var posX = last.RectTransform.localPosition.x + xPosOffset;
         var posY = last.RectTransform.localPosition.y + lastHeight / 2f + height / 2f;

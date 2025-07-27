@@ -9,11 +9,12 @@ public class DragTarget : MonoBehaviour, IDragTarget
     public event Action DragBegin;
     public event Action DragEnd;
 
+    public GameObject GameObject => gameObject;
     public RectTransform RectTransform => _image.rectTransform;
 
     public GameObject GetDraggableGhost()
     {
-        var ghost = Instantiate(this.gameObject);
+        var ghost = Instantiate(gameObject);
         var ghostRectTransform = ghost.GetComponent<RectTransform>();
         ghostRectTransform.sizeDelta = _image.rectTransform.sizeDelta;
         

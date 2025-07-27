@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 public class ScrollArea : MonoBehaviour
 {
-    public List<DragTarget> items = new();
+    public List<IDragTarget> items = new();
     public ScrollRect scroll;
 
     private void Awake()

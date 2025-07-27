@@ -1,0 +1,107 @@
+using UniRx;
+using UnityEngine;
+
+public class DragDropController : MonoBehaviour
+{
+    [SerializeField] private InputHandler _inputHandler;
+    [SerializeField] private DragHoldDetector _dragDetector;
+    [SerializeField] private RayProvider _rayProvider;
+    [SerializeField] private RectTransform _dragContainer;
+
+    private readonly CompositeDisposable _disposables = new();
+    
+    private IDragTarget _dragTarget;
+    private GameObject _dragObject;
+    private GameObject _dragGhost;
+    private bool _isDragging;
+
+    private void Awake()
+    {
+        _inputHandler.PointerDown
+            .Subscribe(OnPointerDown)
+            .AddTo(_disposables);
+
+        _inputHandler.PointerMove
+            .Subscribe(OnPointerMove)
+            .AddTo(_disposables);
+
+        _inputHandler.PointerUp
+            .Subscribe(OnPointerUp)
+            .AddTo(_disposables);
+
+        _dragDetector.HoldCompleted
+            .Subscribe(OnBeginDrag)
+            .AddTo(_disposables);
+    }
+
+    private void OnDestroy()
+    {
+        _disposables.Dispose();
+    }
+
+    private void OnPointerDown(Vector2 position)
+    {
+        if (_rayProvider.TryGetHit(position, out var hitObject) &&
+            hitObject.TryGetComponent<IDragTarget>(out var dragTarget))
+        {
+            _dragObject = hitObject;
+            _dragTarget = dragTarget;
+
+            _dragDetector.BeginHold(position);
+        }
+    }
+
+    private void OnPointerMove(Vector2 position)
+    {
+        if (_isDragging)
+        {
+            OnUpdateDrag(position);
+            return;
+        }
+
+        _dragDetector.UpdateHold(position);
+    }
+
+    private void OnPointerUp(Vector2 position)
+    {
+        if (_isDragging)
+        {
+            OnEndDrag(position);
+            return;
+        }
+
+        _dragDetector.ResetHold();
+    }
+
+    private void OnBeginDrag(Vector2 position)
+    {
+        _dragGhost = _dragTarget.GetDraggableGhost();
+        _dragGhost.transform.SetParent(_dragContainer);
+        _dragGhost.transform.position = position;
+        _dragGhost.transform.localScale = Vector3.one;
+        _isDragging = true;
+    }
+
+    private void OnUpdateDrag(Vector2 position)
+    {
+        _dragGhost.transform.position = position;
+    }
+
+    private void OnEndDrag(Vector2 position)
+    {
+        var eventData = new DropEventData(position, _dragObject);
+        
+        _dragTarget.ReleaseDraggableGhost(_dragGhost);
+        
+        if (_rayProvider.TryGetHit(position, out var hitObject) &&
+            hitObject.TryGetComponent<IDropTarget>(out var dropTarget))
+        {
+            dropTarget.OnDrop(eventData);
+        }
+        
+        _dragGhost = null;
+        _dragTarget = null;
+        _dragObject = null;
+        _isDragging = false;
+    }
+}

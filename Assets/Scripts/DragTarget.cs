@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class DraggableCube : MonoBehaviour, IDragTarget
+public class DragTarget : MonoBehaviour, IDragTarget
 {
     [SerializeField] private Image _image;
 

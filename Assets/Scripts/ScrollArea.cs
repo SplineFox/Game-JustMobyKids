@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 public class ScrollArea : MonoBehaviour
 {
-    public List<DraggableCube> items = new();
+    public List<DragTarget> items = new();
     public ScrollRect scroll;
 
     private void Awake()

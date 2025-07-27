@@ -1,7 +1,7 @@
 using UniRx;
 using UnityEngine;
 
-public class DragAndDropController : MonoBehaviour
+public class DragDropController : MonoBehaviour
 {
     [SerializeField] private InputHandler _inputHandler;
     [SerializeField] private DragHoldDetector _dragDetector;

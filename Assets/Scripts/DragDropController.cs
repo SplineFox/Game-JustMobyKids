@@ -90,15 +90,15 @@ public class DragDropController : MonoBehaviour
     private void OnEndDrag(Vector2 position)
     {
         var eventData = new DropEventData(position, _dragObject);
-
+        
+        _dragTarget.ReleaseDraggableGhost(_dragGhost);
+        
         if (_rayProvider.TryGetHit(position, out var hitObject) &&
-            hitObject.TryGetComponent<IDropTarget>(out var dropTarget) &&
-            dropTarget.CanDrop(eventData))
+            hitObject.TryGetComponent<IDropTarget>(out var dropTarget))
         {
             dropTarget.OnDrop(eventData);
         }
-
-        _dragTarget.ReleaseDraggableGhost(_dragGhost);
+        
         _dragGhost = null;
         _dragTarget = null;
         _dragObject = null;

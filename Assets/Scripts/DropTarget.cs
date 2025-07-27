@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 
 public class DropTarget : MonoBehaviour, IDropTarget
 {
@@ -8,13 +9,21 @@ public class DropTarget : MonoBehaviour, IDropTarget
     
     private List<IDragTarget> _items = new();
     private float _towerHeight;
+
+    public void OnDrop(DropEventData eventData)
+    {
+        if (!CanDrop(eventData))
+            return;
+        
+        Drop(eventData);
+    }
     
-    public bool CanDrop(DropEventData eventData)
+    private bool CanDrop(DropEventData eventData)
     {
         return _towerHeight < _container.rect.height;
     }
 
-    public void OnDrop(DropEventData eventData)
+    private void Drop(DropEventData eventData)
     {
         eventData.RectTransform.SetParent(_container, false);
 

@@ -75,6 +75,7 @@ public class DragAndDropController : MonoBehaviour
         _dragGhost = _dragTarget.GetDraggableGhost();
         _dragGhost.transform.SetParent(_dragContainer);
         _dragGhost.transform.position = position;
+        _dragGhost.transform.localScale = Vector3.one;
     }
     
     private void OnUpdateDrag(Vector2 position)

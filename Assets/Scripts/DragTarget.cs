@@ -9,9 +9,6 @@ public class DragTarget : MonoBehaviour, IDragTarget
     public event Action DragBegin;
     public event Action DragEnd;
 
-    public GameObject GameObject => gameObject;
-    public RectTransform RectTransform => _image.rectTransform;
-
     public GameObject GetDraggableGhost()
     {
         var ghost = Instantiate(gameObject);

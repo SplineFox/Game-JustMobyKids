@@ -9,23 +9,23 @@ public class DropTarget : MonoBehaviour, IDropTarget
     private List<IDragTarget> _items = new();
     private float _towerHeight;
     
-    public bool CanDrop(IDragTarget dragTarget, Vector2 dropPosition)
+    public bool CanDrop(DropEventData eventData)
     {
         return _towerHeight < _container.rect.height;
     }
 
-    public void OnDrop(IDragTarget dragTarget, Vector2 dropPosition)
+    public void OnDrop(DropEventData eventData)
     {
-        dragTarget.RectTransform.SetParent(_container, false);
+        eventData.RectTransform.SetParent(_container, false);
 
         if (_items.Count > 0)
         {
             var item = _items.Last();
-            PlaceOverCube(dragTarget, item, dropPosition);
+            PlaceOverCube(dragTarget, item, eventData.Position);
         }
         else
         {
-            PlaceOverBox(dragTarget, dropPosition);
+            PlaceOverBox(dragTarget, eventData.Position);
         }
         
         _items.Add(dragTarget);

@@ -4,6 +4,7 @@ using UnityEngine.EventSystems;
 
 public class DragAndDropController : MonoBehaviour
 {
+    [SerializeField] private InputHandler _inputHandler;
     [SerializeField] private RayProvider _rayProvider;
     [SerializeField] private RectTransform _dragContainer;
     [SerializeField, Min(0f)] private float _holdTimeToDrag = 0.25f;
@@ -21,24 +22,22 @@ public class DragAndDropController : MonoBehaviour
     
     public void Awake()
     {
-        Observable.EveryUpdate()
-            .Where(_ => Input.GetMouseButtonDown(0))
-            .Subscribe(_ => OnPointerDown())
+        _inputHandler.PointerDown
+            .Subscribe(OnPointerDown)
             .AddTo(_disposables);
         
-        Observable.EveryUpdate()
-            .Where(_ => Input.GetMouseButtonUp(0))
-            .Subscribe(_ => OnPointerUp())
+        _inputHandler.PointerUp
+            .Subscribe(OnPointerUp)
             .AddTo(_disposables);
         
-        Observable.EveryUpdate()
+        _inputHandler.PointerMove
             .Where(_ => _isDragging)
-            .Subscribe(_ => OnDrag())
+            .Subscribe(OnDrag)
             .AddTo(_disposables);
         
-        Observable.EveryUpdate()
-            .Where(_ => Input.GetMouseButtonUp(0) && _isDragging)
-            .Subscribe(_ => OnEndDrag())
+        _inputHandler.PointerUp
+            .Where(_ => _isDragging)
+            .Subscribe(OnEndDrag)
             .AddTo(_disposables);
     }
 
@@ -67,12 +66,12 @@ public class DragAndDropController : MonoBehaviour
         
         _holdTime = 0f;
         _isHolding = false;
-        OnBeginDrag();
+        OnBeginDrag(Input.mousePosition);
     }
 
-    private void OnPointerDown()
+    private void OnPointerDown(Vector2 position)
     {
-        _startMousePosition = Input.mousePosition;
+        _startMousePosition = position;
         var pointerData = new PointerEventData(EventSystem.current) 
         {
             position = _startMousePosition
@@ -85,7 +84,7 @@ public class DragAndDropController : MonoBehaviour
         }
     }
     
-    private void OnPointerUp()
+    private void OnPointerUp(Vector2 position)
     {
         if (_isHolding)
         {
@@ -95,31 +94,32 @@ public class DragAndDropController : MonoBehaviour
         }
     }
 
-    private void OnBeginDrag()
+    private void OnBeginDrag(Vector2 position)
     {
         _isDragging = true;
         _dragGhost = _dragTarget.GetDraggableGhost();
         _dragGhost.transform.SetParent(_dragContainer);
+        _dragGhost.transform.position = position;
     }
     
-    private void OnDrag()
+    private void OnDrag(Vector2 position)
     {
-        _dragGhost.transform.position = Input.mousePosition;
+        _dragGhost.transform.position = position;
     }
 
-    private void OnEndDrag()
+    private void OnEndDrag(Vector2 pointerPosition)
     {
         var pointerData = new PointerEventData(EventSystem.current) 
         {
-            position = Input.mousePosition
+            position = pointerPosition
         };
         
         _dragTarget.ReleaseDraggableGhost(_dragGhost);
         _dragGhost = null;
         
-        if (_rayProvider.TryGetHit<IDropTarget>(pointerData, out var dropTarget) && dropTarget.CanDrop(_dragTarget, Input.mousePosition))
+        if (_rayProvider.TryGetHit<IDropTarget>(pointerData, out var dropTarget) && dropTarget.CanDrop(_dragTarget, pointerPosition))
         {
-            dropTarget.OnDrop(_dragTarget, Input.mousePosition);
+            dropTarget.OnDrop(_dragTarget, pointerPosition);
         }
         
         _dragTarget = null;

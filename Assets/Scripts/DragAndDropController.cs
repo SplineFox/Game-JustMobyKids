@@ -9,8 +9,8 @@ public class DragAndDropController : MonoBehaviour
     [SerializeField, Min(0f)] private float _holdTimeToDrag = 0.25f;
     [SerializeField, Min(0f)] private float _holdAllowedOffset = 30f;
     
-    private IDraggableSource _draggableSource;
-    private GameObject _draggableGhost;
+    private IDragTarget _dragTarget;
+    private GameObject _dragGhost;
     
     private bool _isHolding;
     private bool _isDragging;
@@ -57,7 +57,7 @@ public class DragAndDropController : MonoBehaviour
         {
             _holdTime = 0f;
             _isHolding = false;
-            _draggableSource = null;
+            _dragTarget = null;
             return;
         }
         
@@ -66,10 +66,8 @@ public class DragAndDropController : MonoBehaviour
             return;
         
         _holdTime = 0f;
-        _isDragging = true;
         _isHolding = false;
-        _draggableGhost = _draggableSource.GetDraggableGhost();
-        _draggableGhost.transform.SetParent(_dragContainer);
+        OnBeginDrag();
     }
 
     private void OnPointerDown()
@@ -80,9 +78,9 @@ public class DragAndDropController : MonoBehaviour
             position = _startMousePosition
         };
         
-        if (_rayProvider.TryGetHit<IDraggableSource>(pointerData, out var draggable))
+        if (_rayProvider.TryGetHit<IDragTarget>(pointerData, out var dragTarget))
         {
-            _draggableSource = draggable;
+            _dragTarget = dragTarget;
             _isHolding = true;
         }
     }
@@ -92,21 +90,39 @@ public class DragAndDropController : MonoBehaviour
         if (_isHolding)
         {
             _isHolding = false;
-            _draggableSource = null;
+            _dragTarget = null;
             _holdTime = 0f;
         }
+    }
+
+    private void OnBeginDrag()
+    {
+        _isDragging = true;
+        _dragGhost = _dragTarget.GetDraggableGhost();
+        _dragGhost.transform.SetParent(_dragContainer);
     }
     
     private void OnDrag()
     {
-        _draggableGhost.transform.position = Input.mousePosition;
+        _dragGhost.transform.position = Input.mousePosition;
     }
 
     private void OnEndDrag()
     {
-        _draggableSource.ReleaseDraggableGhost(_draggableGhost);
-        _draggableSource = null;
-        _draggableGhost = null;
+        var pointerData = new PointerEventData(EventSystem.current) 
+        {
+            position = Input.mousePosition
+        };
+        
+        _dragTarget.ReleaseDraggableGhost(_dragGhost);
+        _dragGhost = null;
+        
+        if (_rayProvider.TryGetHit<IDropTarget>(pointerData, out var dropTarget) && dropTarget.CanDrop(_dragTarget, Input.mousePosition))
+        {
+            dropTarget.OnDrop(_dragTarget, Input.mousePosition);
+        }
+        
+        _dragTarget = null;
         _isDragging = false;
     }
 }

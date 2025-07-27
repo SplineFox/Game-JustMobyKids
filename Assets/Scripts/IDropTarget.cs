@@ -1,5 +1,7 @@
+using UnityEngine;
+
 public interface IDropTarget
 {
-    bool CanDrop(IDraggableTarget draggable);
-    void OnDrop(IDraggableTarget draggable);
+    bool CanDrop(IDragTarget dragTarget, Vector2 dropPosition);
+    void OnDrop(IDragTarget dragTarget, Vector2 dropPosition);
 }

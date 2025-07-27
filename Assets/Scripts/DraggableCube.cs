@@ -2,12 +2,14 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class DraggableCube : MonoBehaviour, IDraggableSource
+public class DraggableCube : MonoBehaviour, IDragTarget
 {
     [SerializeField] private Image _image;
 
     public event Action DragBegin;
     public event Action DragEnd;
+
+    public RectTransform RectTransform => _image.rectTransform;
 
     public GameObject GetDraggableGhost()
     {

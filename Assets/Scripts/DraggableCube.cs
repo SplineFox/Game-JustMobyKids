@@ -17,6 +17,9 @@ public class DraggableCube : MonoBehaviour, IDragTarget
         var ghostRectTransform = ghost.GetComponent<RectTransform>();
         ghostRectTransform.sizeDelta = Vector2.one * 180f;
         
+        var image = ghost.GetComponent<Image>();
+        image.raycastTarget = false;
+        
         SetTransparent();
         DragBegin?.Invoke();
         return ghost;

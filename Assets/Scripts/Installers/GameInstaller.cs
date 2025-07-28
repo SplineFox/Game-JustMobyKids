@@ -17,6 +17,7 @@ public class GameInstaller : MonoInstaller
     [Header("Containers")]
     [SerializeField] private SlotContainer _slotContainer;
     [SerializeField] private Hole _hole;
+    [SerializeField] private Tower _tower;
     [SerializeField] private ElementGhost _elementGhost;
     
     public override void InstallBindings()
@@ -39,5 +40,6 @@ public class GameInstaller : MonoInstaller
         
         Container.BindInterfacesAndSelfTo<SlotContainer>().FromInstance(_slotContainer).AsSingle();
         Container.BindInterfacesAndSelfTo<Hole>().FromInstance(_hole);
+        Container.BindInterfacesAndSelfTo<Tower>().FromInstance(_tower);
     }
 }

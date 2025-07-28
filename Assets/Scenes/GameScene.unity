@@ -273,7 +273,7 @@ MonoBehaviour:
   _dragContainer: {fileID: 1399850947}
   _animationEndPoint: {fileID: 1220089089}
   _animationDuration: 1
-  _animationMaskTime: 0.7
+  _animationMaskTime: 0.68
 --- !u!1 &374142288
 GameObject:
   m_ObjectHideFlags: 0

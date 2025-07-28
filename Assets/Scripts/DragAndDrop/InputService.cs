@@ -2,14 +2,14 @@ using System;
 using UniRx;
 using UnityEngine;
 
-public class InputHandler : MonoBehaviour
+public class InputService
 {
     public Vector2 PointerPosition { get; private set; }
     public IObservable<Vector2> PointerMove { get; private set; }
     public IObservable<Vector2> PointerDown { get; private set; }
     public IObservable<Vector2> PointerUp { get; private set; }
 
-    private void Awake()
+    public InputService()
     {
         PointerMove = Observable.EveryUpdate()
             .Select(_ => (Vector2)Input.mousePosition)

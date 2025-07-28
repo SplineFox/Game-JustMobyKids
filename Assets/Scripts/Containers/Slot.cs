@@ -34,6 +34,7 @@ public class Slot : ElementContainer
         _element.DragEnd += ElementDragEnd;
         
         _element.RectTransform.SetParent(_rectTransform);
+        
         _element.RectTransform.localScale = Vector3.one;
         
         _element.RectTransform.offsetMin = Vector2.zero;
@@ -41,6 +42,8 @@ public class Slot : ElementContainer
         
         _element.RectTransform.anchorMin = Vector2.one * 0.5f;
         _element.RectTransform.anchorMax = Vector2.one * 0.5f;
+        
+        _element.RectTransform.sizeDelta = _rectTransform.sizeDelta;
     }
 
     public override void RemoveElement(Element element)

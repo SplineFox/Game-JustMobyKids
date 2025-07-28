@@ -1,13 +1,15 @@
+using System;
 using UniRx;
 using UnityEngine;
+using Zenject;
 
-public class DragDropController : MonoBehaviour
+public class DragDropService : MonoBehaviour, IInitializable, IDisposable
 {
-    [SerializeField] private InputHandler _inputHandler;
     [SerializeField] private DragHoldDetector _dragDetector;
-    [SerializeField] private RayProvider _rayProvider;
+    [SerializeField] private RayHitProvider _rayHitProvider;
     [SerializeField] private RectTransform _dragContainer;
 
+    private InputService _inputHandler;
     private readonly CompositeDisposable _disposables = new();
     
     private IDragTarget _dragTarget;
@@ -15,7 +17,13 @@ public class DragDropController : MonoBehaviour
     private GameObject _dragGhost;
     private bool _isDragging;
 
-    private void Awake()
+    [Inject]
+    public void Construct(InputService inputHandler)
+    {
+        _inputHandler = inputHandler;
+    }
+    
+    public void Initialize()
     {
         _inputHandler.PointerDown
             .Subscribe(OnPointerDown)
@@ -34,14 +42,14 @@ public class DragDropController : MonoBehaviour
             .AddTo(_disposables);
     }
 
-    private void OnDestroy()
+    public void Dispose()
     {
-        _disposables.Dispose();
+        _disposables?.Dispose();
     }
 
     private void OnPointerDown(Vector2 position)
     {
-        if (_rayProvider.TryGetHit(position, out var hitObject) &&
+        if (_rayHitProvider.TryGetHit(position, out var hitObject) &&
             hitObject.TryGetComponent<IDragTarget>(out var dragTarget))
         {
             _dragObject = hitObject;
@@ -93,7 +101,7 @@ public class DragDropController : MonoBehaviour
         
         _dragTarget.ReleaseDraggableGhost(_dragGhost);
         
-        if (_rayProvider.TryGetHit(position, out var hitObject) &&
+        if (_rayHitProvider.TryGetHit(position, out var hitObject) &&
             hitObject.TryGetComponent<IDropTarget>(out var dropTarget))
         {
             dropTarget.OnDrop(eventData);

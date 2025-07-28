@@ -16,14 +16,18 @@ public class GameInstaller : MonoInstaller
     
     [Header("Containers")]
     [SerializeField] private SlotContainer _slotContainer;
+    [SerializeField] private Hole _hole;
+    [SerializeField] private ElementGhost _elementGhost;
     
     public override void InstallBindings()
     {
+        Container.Bind<ElementGhost>().FromInstance(_elementGhost).AsSingle();
+        
         Container.Bind<GameConfiguration>().FromInstance(_gameConfiguration).AsSingle();
         Container.Bind<ElementConfigurationDatabase>().FromInstance(_elementConfigurationDatabase).AsSingle();
         
         Container.BindMemoryPool<Element, ElementPool>()
-            .WithInitialSize(10)
+            .WithInitialSize(20)
             .FromComponentInNewPrefab(_elementPrefab)
             .UnderTransformGroup("ElementPoolContainer");
 
@@ -34,5 +38,6 @@ public class GameInstaller : MonoInstaller
         Container.BindInterfacesAndSelfTo<DragDropService>().FromInstance(_dragDropService).AsSingle();
         
         Container.BindInterfacesAndSelfTo<SlotContainer>().FromInstance(_slotContainer).AsSingle();
+        Container.BindInterfacesAndSelfTo<Hole>().FromInstance(_hole);
     }
 }

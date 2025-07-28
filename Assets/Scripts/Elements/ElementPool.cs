@@ -6,4 +6,14 @@ public class ElementPool : MemoryPool<ElementConfiguration, Element>
     {
         element.Initialize(configuration);
     }
+
+    protected override void OnDespawned(Element item)
+    {
+        item.gameObject.SetActive(false);
+    }
+
+    protected override void OnSpawned(Element item)
+    {
+        item.gameObject.SetActive(true);
+    }
 }

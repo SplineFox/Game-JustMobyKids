@@ -22,7 +22,7 @@ public class Slot : ElementContainer
 
     private void Start()
     {
-        SpawnElement();
+        SpawnElement(false);
     }
 
     public override void AddElement(Element element)
@@ -51,13 +51,15 @@ public class Slot : ElementContainer
         _element.DragBegin -= ElementDragBegin;
         _element.DragEnd -= ElementDragEnd;
 
-        SpawnElement();
+        SpawnElement(true);
     }
 
-    private void SpawnElement()
+    private void SpawnElement(bool shouldAnimate = false)
     {
         var element = _elementPool.Spawn(_elementConfiguration);
         AddElement(element);
-        element.PlayAppearAnimation();
+        
+        if(shouldAnimate)
+            element.PlayAppearAnimation();
     }
 }

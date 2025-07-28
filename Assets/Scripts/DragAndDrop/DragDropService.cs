@@ -6,7 +6,7 @@ using Zenject;
 public class DragDropService : MonoBehaviour, IInitializable, IDisposable
 {
     [SerializeField] private DragHoldDetector _dragDetector;
-    [SerializeField] private RayProvider _rayProvider;
+    [SerializeField] private RayHitProvider _rayHitProvider;
     [SerializeField] private RectTransform _dragContainer;
 
     private InputService _inputHandler;
@@ -49,7 +49,7 @@ public class DragDropService : MonoBehaviour, IInitializable, IDisposable
 
     private void OnPointerDown(Vector2 position)
     {
-        if (_rayProvider.TryGetHit(position, out var hitObject) &&
+        if (_rayHitProvider.TryGetHit(position, out var hitObject) &&
             hitObject.TryGetComponent<IDragTarget>(out var dragTarget))
         {
             _dragObject = hitObject;
@@ -101,7 +101,7 @@ public class DragDropService : MonoBehaviour, IInitializable, IDisposable
         
         _dragTarget.ReleaseDraggableGhost(_dragGhost);
         
-        if (_rayProvider.TryGetHit(position, out var hitObject) &&
+        if (_rayHitProvider.TryGetHit(position, out var hitObject) &&
             hitObject.TryGetComponent<IDropTarget>(out var dropTarget))
         {
             dropTarget.OnDrop(eventData);

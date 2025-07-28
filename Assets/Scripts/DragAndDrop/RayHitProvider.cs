@@ -3,7 +3,7 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
 
-public class RayProvider : MonoBehaviour
+public class RayHitProvider : MonoBehaviour
 {
     [SerializeField] private GraphicRaycaster _raycaster;
     

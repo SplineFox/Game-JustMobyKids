@@ -80,6 +80,7 @@ public class Tower : ElementContainer, IDropTarget
     private void HandleMissDrop(Element element, Vector2 dropPosition)
     {
         element.SetContainer(null);
+        element.CanBeDragged = false;
         element.RectTransform.SetParent(_dragTransform, true);
         element.RectTransform.position = dropPosition;
         element.PlayDisappearAnimation(() =>

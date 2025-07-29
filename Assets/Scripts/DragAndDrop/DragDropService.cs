@@ -12,25 +12,24 @@ public class DragDropService : MonoBehaviour, IInitializable, IDisposable
     private readonly CompositeDisposable _disposables = new();
     private LayerMask _dragTargetLayer;
     private LayerMask _dropTargetLayer;
-    
+
     private InputService _inputHandler;
     private IDragTarget _dragTarget;
     private GameObject _dragObject;
     private GameObject _dragGhost;
     private bool _isDragging;
-    
 
     [Inject]
     public void Construct(InputService inputHandler)
     {
         _inputHandler = inputHandler;
     }
-    
+
     public void Initialize()
     {
         _dragTargetLayer = LayerMask.NameToLayer("DragTarget");
         _dropTargetLayer = LayerMask.NameToLayer("DropTarget");
-        
+
         _inputHandler.PointerDown
             .Subscribe(OnPointerDown)
             .AddTo(_disposables);
@@ -56,7 +55,8 @@ public class DragDropService : MonoBehaviour, IInitializable, IDisposable
     private void OnPointerDown(Vector2 position)
     {
         if (_rayHitProvider.TryGetHit(position, _dragTargetLayer, out var hitObject) &&
-            hitObject.TryGetComponent<IDragTarget>(out var dragTarget))
+            hitObject.TryGetComponent<IDragTarget>(out var dragTarget) &&
+            dragTarget.CanBeDragged)
         {
             _dragObject = hitObject;
             _dragTarget = dragTarget;
@@ -104,15 +104,15 @@ public class DragDropService : MonoBehaviour, IInitializable, IDisposable
     private void OnEndDrag(Vector2 position)
     {
         var eventData = new DropEventData(position, _dragObject);
-        
+
         _dragTarget.ReleaseDraggableGhost(_dragGhost);
-        
+
         if (_rayHitProvider.TryGetHit(position, _dropTargetLayer, out var hitObject) &&
             hitObject.TryGetComponent<IDropTarget>(out var dropTarget))
         {
             dropTarget.OnDrop(eventData);
         }
-        
+
         _dragGhost = null;
         _dragTarget = null;
         _dragObject = null;

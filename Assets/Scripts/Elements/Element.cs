@@ -8,7 +8,7 @@ public class Element : MonoBehaviour, IDragTarget
 {
     public event Action DragBegin;
     public event Action DragEnd;
-    
+
     [SerializeField] private RectTransform _rectTransform;
     [SerializeField] private Image _image;
 
@@ -17,6 +17,7 @@ public class Element : MonoBehaviour, IDragTarget
     private ElementConfiguration _configuration;
     private Tween _tween;
 
+    public bool CanBeDragged { get; set; }
     public RectTransform RectTransform => _rectTransform;
     public ElementConfiguration Configuration => _configuration;
 
@@ -28,6 +29,7 @@ public class Element : MonoBehaviour, IDragTarget
     
     public void Initialize(ElementConfiguration configuration)
     {
+        CanBeDragged = true;
         _configuration = configuration;
         _image.sprite = configuration.Sprite;
     }

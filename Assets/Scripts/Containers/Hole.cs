@@ -39,6 +39,7 @@ public class Hole : MonoBehaviour, IDropTarget
 
         _element = element;
         _element.SetContainer(null);
+        _element.CanBeDragged = false;
 
         PlayDropAnimation(() =>
         {

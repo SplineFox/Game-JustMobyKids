@@ -1,0 +1,22 @@
+[
+  {
+    "Id": "element_add",
+    "Text": "You placed the element"
+  },
+  {
+    "Id": "element_miss",
+    "Text": "You missed"
+  },
+  {
+    "Id": "element_destroy",
+    "Text": "Element destroyed"
+  },
+  {
+    "Id": "element_destroy_reject",
+    "Text": "This element cannot be destroyed"
+  },
+  {
+    "Id": "element_drop_max_tower",
+    "Text": "Cannot build any more"
+  }
+]

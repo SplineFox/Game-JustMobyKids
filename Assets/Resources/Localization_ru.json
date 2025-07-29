@@ -1,0 +1,22 @@
+[
+  {
+    "Id": "element_add",
+    "Text": "Вы попали!"
+  },
+  {
+    "Id": "element_miss",
+    "Text": "Вы промахнулись"
+  },
+  {
+    "Id": "element_destroy",
+    "Text": "Элемент уничтожен"
+  },
+  {
+    "Id": "element_destroy_reject",
+    "Text": "Этот элемент нельзя уничтожить"
+  },
+  {
+    "Id": "element_drop_max_tower",
+    "Text": "Больше строить нельзя"
+  }
+]

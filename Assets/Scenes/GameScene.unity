@@ -2007,6 +2007,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _gameConfiguration: {fileID: 11400000, guid: 843904b56a6e4ce4998bd65916351b4a, type: 2}
+  _localizationConfiguration: {fileID: 11400000, guid: 456cc19fc5679fb4ab6c6c2b7c7521e2, type: 2}
   _elementConfigurationDatabase: {fileID: 11400000, guid: 27ae1c06004811f48b56490fdb103ad8, type: 2}
   _elementPrefab: {fileID: 7375370660446691450, guid: 6a413e191068a474ebb264d48471d4b2, type: 3}
   _slotPrefab: {fileID: 2273750763163130830, guid: 4f646b4c116646e47b909731c8fe3c05, type: 3}

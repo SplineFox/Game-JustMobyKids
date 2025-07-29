@@ -5,6 +5,7 @@ public class GameInstaller : MonoInstaller
 {
     [Header("Configurations")]
     [SerializeField] private GameConfiguration _gameConfiguration;
+    [SerializeField] private LocalizationConfiguration _localizationConfiguration;
     [SerializeField] private ElementConfigurationDatabase _elementConfigurationDatabase;
 
     [Header("Prefabs")]
@@ -22,13 +23,18 @@ public class GameInstaller : MonoInstaller
     
     public override void InstallBindings()
     {
+        Container.Bind<GameConfiguration>().FromInstance(_gameConfiguration).AsSingle();
+        Container.Bind<LocalizationConfiguration>().FromInstance(_localizationConfiguration).AsSingle();
+        Container.Bind<ElementConfigurationDatabase>().FromInstance(_elementConfigurationDatabase).AsSingle();
+        
         Container.BindInterfacesAndSelfTo<SaveService>().FromNew().AsSingle();
         Container.BindInterfacesAndSelfTo<SaveInvoker>().FromNew().AsSingle();
         
-        Container.Bind<ElementGhost>().FromInstance(_elementGhost).AsSingle();
+        Container.BindInterfacesAndSelfTo<LocalizationLoader>().FromNew().AsSingle();
+        Container.BindInterfacesAndSelfTo<LocalizationService>().FromNew().AsSingle();
         
-        Container.Bind<GameConfiguration>().FromInstance(_gameConfiguration).AsSingle();
-        Container.Bind<ElementConfigurationDatabase>().FromInstance(_elementConfigurationDatabase).AsSingle();
+        Container.Bind<ElementGhost>().FromInstance(_elementGhost).AsSingle();
+       
         
         Container.BindMemoryPool<Element, ElementPool>()
             .WithInitialSize(20)

@@ -56,8 +56,6 @@ public class Tower : ElementContainer, IDropTarget
 
     public void OnDrop(DropEventData eventData)
     {
-        Debug.Log(eventData.Position);
-        
         if (_sequence != null && _sequence.IsPlaying() ||
             !eventData.GameObject.TryGetComponent<Element>(out var element))
         {

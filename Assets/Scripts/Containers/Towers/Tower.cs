@@ -56,6 +56,7 @@ public class Tower : ElementContainer, IInitializable, IDropTarget
             
             _elements.Add(element);
         }
+        RecalculateTowerHeight();
     }
     
     public override void AddElement(Element element)
@@ -82,6 +83,8 @@ public class Tower : ElementContainer, IInitializable, IDropTarget
         {
             _save.ElementsData.RemoveAt(elementIndex);
             _elements.RemoveAt(elementIndex);
+            
+            RefreshSavedPositions();
             RecalculateTowerHeight();
         });
     }
@@ -118,9 +121,9 @@ public class Tower : ElementContainer, IInitializable, IDropTarget
         element.RectTransform.SetParent(_dragTransform, true);
         _animator.PlayAddAnimation(element, elementPosition, () =>
         {
-            AddElement(element);
-            element.CanBeDragged = true;
             element.RectTransform.SetParent(_rectTransform, true);
+            element.CanBeDragged = true;
+            AddElement(element);
         });
     }
     
@@ -142,5 +145,16 @@ public class Tower : ElementContainer, IInitializable, IDropTarget
 
         foreach (var element in _elements)
             _towerHeight += element.RectTransform.rect.height;
+    }
+
+    private void RefreshSavedPositions()
+    {
+        for (var index = 0; index < _save.ElementsData.Count; index++)
+        {
+            var elementData = _save.ElementsData[index];
+            var element = _elements[index];
+            
+            elementData.AnchoredPosition = element.RectTransform.anchoredPosition;
+        }
     }
 }

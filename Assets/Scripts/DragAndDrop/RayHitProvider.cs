@@ -9,15 +9,22 @@ public class RayHitProvider : MonoBehaviour
     
     private readonly List<RaycastResult> _raycastResults = new();
 
-    public bool TryGetHit(Vector2 position, out GameObject hitObject)
+    public bool TryGetHit(Vector2 position, int layer, out GameObject hitObject)
     {
         var pointerData = new PointerEventData(EventSystem.current) { position = position };
         hitObject = null;
         
         _raycaster.Raycast(pointerData, _raycastResults);
-        if (_raycastResults.Count > 0)
-            hitObject = _raycastResults[0].gameObject;
-        
+        for (var index = 0; index < _raycastResults.Count; index++)
+        {
+            var result = _raycastResults[index];
+            if (result.gameObject.layer != layer)
+                continue;
+            
+            hitObject = result.gameObject;
+            break;
+        }
+
         _raycastResults.Clear();
         return hitObject;
     }

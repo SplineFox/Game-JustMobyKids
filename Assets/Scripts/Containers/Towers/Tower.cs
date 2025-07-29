@@ -51,6 +51,7 @@ public class Tower : ElementContainer, IInitializable, IDropTarget
             element.SetContainer(this);
             element.CanBeDestroyed = true;
             element.RectTransform.SetParent(_rectTransform);
+            element.RectTransform.localScale = Vector3.one;
             element.RectTransform.anchoredPosition = elementSave.AnchoredPosition;
             
             _elements.Add(element);

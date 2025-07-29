@@ -27,6 +27,8 @@ public class SlotContainer : MonoBehaviour, IInitializable, IDisposable
             var slot = _slotFactory.Create(configuration);
             
             slot.transform.SetParent(transform);
+            slot.transform.localScale = Vector3.one;
+            
             slot.ElementDragBegin += OnDragBegin;
             slot.ElementDragEnd += OnDragEnd;
             

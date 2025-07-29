@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Zenject;
 using UnityEngine;
 
-public class Tower : ElementContainer, IDropTarget
+public class Tower : ElementContainer, IInitializable, IDropTarget
 {
     public event Action ElementDroppedOnMaxTower;
     public event Action ElementMissed;
@@ -12,43 +12,79 @@ public class Tower : ElementContainer, IDropTarget
     [SerializeField] private RectTransform _rectTransform;
     [SerializeField] private RectTransform _dragTransform;
     
+    private ISaveProvider _saveProvider;
     private ITowerAnimator _animator;
     private ITowerDropValidator _dropValidator;
     private ITowerPlacementProvider _placementProvider;
     
-    private float _towerHeight;
+    private TowerSave _save;
     private ElementPool _elementPool;
+    private ElementConfigurationDatabase _elementConfigurations;
+    
+    private float _towerHeight;
     private List<Element> _elements = new();
     
     private bool IsMaxHeightReached => _towerHeight >= _rectTransform.rect.height;
 
     [Inject]
-    public void Construct(ElementPool elementPool)
+    public void Construct(ElementPool elementPool, ElementConfigurationDatabase elementConfigurations,
+        ISaveProvider saveProvider)
     {
         _elementPool = elementPool;
+        _elementConfigurations = elementConfigurations;
+        _saveProvider = saveProvider;
         
         _animator = new TowerAnimator();
         _dropValidator = new TowerDropValidator();
         _placementProvider = new TowerPlacementProvider();
     }
 
+    public void Initialize()
+    {
+        _save = _saveProvider.GetSaveObject<TowerSave>("tower");
+
+        foreach (var elementSave in _save.ElementsData)
+        {
+            var configuration = _elementConfigurations.GetConfiguration(elementSave.ConfigurationId);
+            var element = _elementPool.Spawn(configuration);
+            
+            element.SetContainer(this);
+            element.CanBeDestroyed = true;
+            element.RectTransform.SetParent(_rectTransform);
+            element.RectTransform.localScale = Vector3.one;
+            element.RectTransform.anchoredPosition = elementSave.AnchoredPosition;
+            
+            _elements.Add(element);
+        }
+        RecalculateTowerHeight();
+    }
+    
     public override void AddElement(Element element)
     {
         element.SetContainer(this);
         element.CanBeDestroyed = true;
         
         _elements.Add(element);
+        _save.ElementsData.Add(new TowerElementData
+        {
+            ConfigurationId = element.Configuration.Id,
+            AnchoredPosition = element.RectTransform.anchoredPosition
+        });
+
         ElementAdded?.Invoke();
-        
         RecalculateTowerHeight();
     }
 
     public override void RemoveElement(Element element)
     {
         var elementIndex = _elements.IndexOf(element);
+        
         _animator.PlayRearrangeAnimation(_elements, elementIndex, () =>
         {
+            _save.ElementsData.RemoveAt(elementIndex);
             _elements.RemoveAt(elementIndex);
+            
+            RefreshSavedPositions();
             RecalculateTowerHeight();
         });
     }
@@ -85,9 +121,9 @@ public class Tower : ElementContainer, IDropTarget
         element.RectTransform.SetParent(_dragTransform, true);
         _animator.PlayAddAnimation(element, elementPosition, () =>
         {
-            AddElement(element);
-            element.CanBeDragged = true;
             element.RectTransform.SetParent(_rectTransform, true);
+            element.CanBeDragged = true;
+            AddElement(element);
         });
     }
     
@@ -109,5 +145,16 @@ public class Tower : ElementContainer, IDropTarget
 
         foreach (var element in _elements)
             _towerHeight += element.RectTransform.rect.height;
+    }
+
+    private void RefreshSavedPositions()
+    {
+        for (var index = 0; index < _save.ElementsData.Count; index++)
+        {
+            var elementData = _save.ElementsData[index];
+            var element = _elements[index];
+            
+            elementData.AnchoredPosition = element.RectTransform.anchoredPosition;
+        }
     }
 }

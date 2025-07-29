@@ -1,65 +1,60 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
+using Newtonsoft.Json;
 using UnityEngine;
 
 public class SaveService : ISaveService
 {
-    private Dictionary<string, ISaveObject> _saveObjects = new();
-    private string _savePath;
+    private readonly Dictionary<string, SaveObjectContainer> _containers = new();
+    private readonly string _savePath = SaveUtils.GetFilePath("saveData.json");
 
-    public SaveService()
-    {
-        _savePath = SaveUtils.GetFilePath("saveData.json");
-    }
-    
     public void Save()
     {
         try
         {
-            var saveData = new Dictionary<string, string>();
-            foreach (var obj in _saveObjects)
-            {
-                saveData[obj.Key] = JsonUtility.ToJson(obj.Value);
-            }
-            var json = JsonUtility.ToJson(saveData, true);
-            File.WriteAllText(_savePath, json);
+            var saveData = _containers.Values.ToList();
+            File.WriteAllText(_savePath, JsonConvert.SerializeObject(saveData, Formatting.Indented));
         }
         catch (Exception e)
         {
-            Debug.LogError($"Failed to save data: {e.Message}");
+            Debug.LogError($"Save failed: {e.Message}");
         }
     }
 
     public void Load()
     {
+        if (!File.Exists(_savePath))
+            return;
+
         try
         {
-            if (!File.Exists(_savePath))
-                return;
-            
             var json = File.ReadAllText(_savePath);
-            var saveData = JsonUtility.FromJson<Dictionary<string, string>>(json);
-                
-            foreach (var pair in saveData)
-            {
-                if (!_saveObjects.ContainsKey(pair.Key))
-                    continue;
-                        
-                JsonUtility.FromJsonOverwrite(pair.Value, _saveObjects[pair.Key]);
-            }
+            var saveData = new List<SaveObjectContainer>();
+            
+            JsonConvert.PopulateObject(json, saveData);
+
+            foreach (var save in saveData)
+                _containers[save.Id] = save;
         }
         catch (Exception e)
         {
-            Debug.LogError($"Failed to load data: {e.Message}");
+            Debug.LogError($"Load failed: {e.Message}");
         }
     }
 
-    public T GetSaveObject<T>(string objectId) where T : ISaveObject, new()
+    public T GetSaveObject<T>(string id) where T : ISaveObject, new()
     {
-        if (!_saveObjects.ContainsKey(objectId))
-            _saveObjects[objectId] = new T();
+        if (!_containers.TryGetValue(id, out var container))
+        {
+            container = new SaveObjectContainer(id, new T());
+            _containers.Add(container.Id, container);
+        }
         
-        return (T)_saveObjects[objectId];
+        if (!container.Deserialized)
+            container.Deserialize<T>();
+        
+        return (T)container.SaveObject;
     }
 }

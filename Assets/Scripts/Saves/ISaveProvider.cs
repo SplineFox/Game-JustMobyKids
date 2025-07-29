@@ -1,4 +1,4 @@
 public interface ISaveProvider
 {
-    T GetSaveObject<T>(string objectId) where T : ISaveObject, new();
+    T GetSaveObject<T>(string id) where T : ISaveObject, new();
 }

@@ -5,7 +5,6 @@ using UnityEngine;
 [Serializable]
 public class TowerSave : ISaveObject
 {
-    public string Id => "tower";
     public List<TowerElementData> ElementsData = new();
 }
 

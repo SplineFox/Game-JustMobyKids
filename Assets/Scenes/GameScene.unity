@@ -2081,6 +2081,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: CubeGhost
       objectReference: {fileID: 0}
+    - target: {fileID: 2699774884601586623, guid: 5d7d79c8c11589b439f11d5f1185c47b, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

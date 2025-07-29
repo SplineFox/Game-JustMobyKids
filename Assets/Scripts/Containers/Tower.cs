@@ -94,14 +94,15 @@ public class Tower : ElementContainer, IDropTarget
     private void HandleDrop(Element element, Vector2 dropPosition)
     {
         var lastElement = _elements.LastOrDefault();
+        var position = lastElement == null 
+            ? GetPositionForFirst(element, dropPosition) 
+            : GetPositionForLast(element, lastElement);
         
-        AddElement(element);
-        element.RectTransform.SetParent(_dragTransform, true);
-        element.RectTransform.position = lastElement == null 
-            ? GetDropFirstPosition(element, dropPosition) 
-            : GetDropLastPosition(element, lastElement);
-        
-        element.RectTransform.SetParent(_rectTransform, true);
+        PlayAddAnimation(element, position, () =>
+        {
+            AddElement(element);
+            element.RectTransform.SetParent(_rectTransform, true);
+        });
     }
 
     private bool IsCollidedWithAnyElement(DropEventData eventData)
@@ -115,7 +116,7 @@ public class Tower : ElementContainer, IDropTarget
         return false;
     }
     
-    private Vector3 GetDropFirstPosition(Element element, Vector2 dropPosition)
+    private Vector3 GetPositionForFirst(Element element, Vector2 dropPosition)
     {
         RectTransformUtility.ScreenPointToLocalPointInRectangle(_rectTransform, dropPosition, null,
             out var localPosition
@@ -131,7 +132,7 @@ public class Tower : ElementContainer, IDropTarget
         return _rectTransform.TransformPoint(pos);
     }
 
-    private Vector3 GetDropLastPosition(Element element, Element lastElement)
+    private Vector3 GetPositionForLast(Element element, Element lastElement)
     {
         var lastHeight = lastElement.RectTransform.rect.height;
         
@@ -145,6 +146,17 @@ public class Tower : ElementContainer, IDropTarget
         var pos = new Vector3(posX, posY, posZ);
         
         return _rectTransform.TransformPoint(pos);
+    }
+    
+    private void PlayAddAnimation(Element element, Vector2 position, Action onComplete)
+    {
+        element.RectTransform.SetParent(_dragTransform, true);
+        element.RectTransform.localScale = Vector3.one;
+
+        _sequence?.Kill();
+        _sequence = DOTween.Sequence()
+            .Append(element.RectTransform.DOJump(position, 150f, 1, 0.5f))
+            .OnComplete(() => onComplete?.Invoke());
     }
 
     private void RecalculateTowerHeight()

@@ -61,7 +61,7 @@ public class Element : MonoBehaviour, IDragTarget
         _tween?.Kill();
         
         _rectTransform.localScale = Vector3.one;
-        _tween = _rectTransform.DOScale(Vector3.zero, 1f)
+        _tween = _rectTransform.DOScale(Vector3.zero, 0.5f)
             .SetEase(Ease.InBack)
             .OnComplete(() => onComplete?.Invoke());
     }

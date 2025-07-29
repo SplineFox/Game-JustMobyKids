@@ -5,6 +5,7 @@ using Zenject;
 using DG.Tweening;
 using UnityEngine;
 using Random = UnityEngine.Random;
+using Sequence = DG.Tweening.Sequence;
 
 public class Tower : ElementContainer, IDropTarget
 {
@@ -49,8 +50,9 @@ public class Tower : ElementContainer, IDropTarget
     public override void RemoveElement(Element element)
     {
         var elementIndex = _elements.IndexOf(element);
-        _elements.RemoveAt(elementIndex);
         
+        PlayRearrangeAnimation(elementIndex);
+        _elements.RemoveAt(elementIndex);
         RecalculateTowerHeight();
     }
 
@@ -157,6 +159,26 @@ public class Tower : ElementContainer, IDropTarget
         _sequence = DOTween.Sequence()
             .Append(element.RectTransform.DOJump(position, 150f, 1, 0.5f))
             .OnComplete(() => onComplete?.Invoke());
+    }
+
+    private void PlayRearrangeAnimation(int elementIndex, Action onComplete = null)
+    {
+        _sequence?.Kill();
+        _sequence = DOTween.Sequence();
+
+        var durationOffset = 0f;
+        for (var index = elementIndex; index < _elements.Count - 1; index++)
+        {
+            var element = _elements[index];
+            var nextElement = _elements[index + 1];
+            var newPosition = element.RectTransform.localPosition;
+
+            _sequence.Join(nextElement.RectTransform.DOLocalMove(newPosition, 0.5f + durationOffset)
+                .SetEase(Ease.InBack));
+            durationOffset += 0.1f;
+        }
+        
+        _sequence.OnComplete(() => onComplete?.Invoke());
     }
 
     private void RecalculateTowerHeight()

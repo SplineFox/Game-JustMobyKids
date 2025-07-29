@@ -22,7 +22,7 @@ public class SaveService : ISaveService
             {
                 saveData[obj.Key] = JsonUtility.ToJson(obj.Value);
             }
-            string json = JsonUtility.ToJson(saveData, true);
+            var json = JsonUtility.ToJson(saveData, true);
             File.WriteAllText(_savePath, json);
         }
         catch (Exception e)

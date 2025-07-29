@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Zenject;
 using UnityEngine;
 
-public class Tower : ElementContainer, IDropTarget
+public class Tower : ElementContainer, IInitializable, IDropTarget
 {
     public event Action ElementDroppedOnMaxTower;
     public event Action ElementMissed;
@@ -16,38 +16,66 @@ public class Tower : ElementContainer, IDropTarget
     private ITowerDropValidator _dropValidator;
     private ITowerPlacementProvider _placementProvider;
     
-    private float _towerHeight;
+    private TowerSave _save;
     private ElementPool _elementPool;
+    private ElementConfigurationDatabase _elementConfigurations;
+    
+    private float _towerHeight;
     private List<Element> _elements = new();
     
     private bool IsMaxHeightReached => _towerHeight >= _rectTransform.rect.height;
 
     [Inject]
-    public void Construct(ElementPool elementPool)
+    public void Construct(ElementPool elementPool, ElementConfigurationDatabase elementConfigurations,
+        ISaveProvider saveProvider)
     {
         _elementPool = elementPool;
+        _save = saveProvider.GetSaveObject<TowerSave>("tower");
         
         _animator = new TowerAnimator();
         _dropValidator = new TowerDropValidator();
         _placementProvider = new TowerPlacementProvider();
     }
 
+    public void Initialize()
+    {
+        foreach (var elementSave in _save.ElementsData)
+        {
+            var configuration = _elementConfigurations.GetConfiguration(elementSave.ConfigurationId);
+            var element = _elementPool.Spawn(configuration);
+            
+            element.SetContainer(this);
+            element.CanBeDestroyed = true;
+            element.RectTransform.SetParent(_rectTransform);
+            element.RectTransform.anchoredPosition = elementSave.AnchoredPosition;
+            
+            _elements.Add(element);
+        }
+    }
+    
     public override void AddElement(Element element)
     {
         element.SetContainer(this);
         element.CanBeDestroyed = true;
         
         _elements.Add(element);
+        _save.ElementsData.Add(new TowerElementData
+        {
+            ConfigurationId = element.Configuration.Id,
+            AnchoredPosition = element.RectTransform.anchoredPosition
+        });
+
         ElementAdded?.Invoke();
-        
         RecalculateTowerHeight();
     }
 
     public override void RemoveElement(Element element)
     {
         var elementIndex = _elements.IndexOf(element);
+        
         _animator.PlayRearrangeAnimation(_elements, elementIndex, () =>
         {
+            _save.ElementsData.RemoveAt(elementIndex);
             _elements.RemoveAt(elementIndex);
             RecalculateTowerHeight();
         });

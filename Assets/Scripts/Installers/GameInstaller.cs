@@ -22,6 +22,9 @@ public class GameInstaller : MonoInstaller
     
     public override void InstallBindings()
     {
+        Container.BindInterfacesAndSelfTo<SaveService>().AsSingle();
+        Container.BindInterfacesAndSelfTo<SaveInvoker>().AsSingle();
+        
         Container.Bind<ElementGhost>().FromInstance(_elementGhost).AsSingle();
         
         Container.Bind<GameConfiguration>().FromInstance(_gameConfiguration).AsSingle();

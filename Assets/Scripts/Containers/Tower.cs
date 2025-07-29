@@ -58,7 +58,7 @@ public class Tower : ElementContainer, IDropTarget
 
     public void OnDrop(DropEventData eventData)
     {
-        if (_sequence != null && _sequence.IsPlaying() ||
+        if (_sequence != null && _sequence.IsActive() ||
             !eventData.GameObject.TryGetComponent<Element>(out var element) ||
             _elements.Contains(element))
         {
@@ -166,16 +166,16 @@ public class Tower : ElementContainer, IDropTarget
         _sequence?.Kill();
         _sequence = DOTween.Sequence();
 
-        var durationOffset = 0f;
+        var animationDuration = 0.5f;
         for (var index = elementIndex; index < _elements.Count - 1; index++)
         {
             var element = _elements[index];
             var nextElement = _elements[index + 1];
             var newPosition = element.RectTransform.localPosition;
 
-            _sequence.Join(nextElement.RectTransform.DOLocalMove(newPosition, 0.5f + durationOffset)
+            _sequence.Join(nextElement.RectTransform.DOLocalMove(newPosition, animationDuration)
                 .SetEase(Ease.InBack));
-            durationOffset += 0.1f;
+            animationDuration += 0.1f;
         }
         
         _sequence.OnComplete(() => onComplete?.Invoke());

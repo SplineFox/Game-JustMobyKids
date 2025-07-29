@@ -8,6 +8,9 @@ public interface IDragTarget
     
     bool CanBeDragged { get; set; }
     
+    
+    void OnGhostDragBegin();
+    void OnGhostDragEnd();
     GameObject GetDraggableGhost();
     void ReleaseDraggableGhost(GameObject draggableGhost);
 }

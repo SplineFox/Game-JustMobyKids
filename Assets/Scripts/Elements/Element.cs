@@ -69,18 +69,26 @@ public class Element : MonoBehaviour, IDragTarget
             .OnComplete(() => onComplete?.Invoke());
     }
 
-    public GameObject GetDraggableGhost()
+    public void OnGhostDragBegin()
     {
         _image.color = new Color(_image.color.r, _image.color.g, _image.color.b, 0.5f);
-        _ghost.Show(this);
         DragBegin?.Invoke();
+    }
+
+    public void OnGhostDragEnd()
+    {
+        _image.color = new Color(_image.color.r, _image.color.g, _image.color.b, 1f);
+        DragEnd?.Invoke();
+    }
+
+    public GameObject GetDraggableGhost()
+    {
+        _ghost.Show(this);
         return _ghost.gameObject;
     }
 
     public void ReleaseDraggableGhost(GameObject draggableGhost)
     {
-        _image.color = new Color(_image.color.r, _image.color.g, _image.color.b, 1f);
-        DragEnd?.Invoke();
         _ghost.Hide();
     }
 }

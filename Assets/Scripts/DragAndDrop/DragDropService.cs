@@ -90,6 +90,8 @@ public class DragDropService : MonoBehaviour, IInitializable, IDisposable
     private void OnBeginDrag(Vector2 position)
     {
         _dragGhost = _dragTarget.GetDraggableGhost();
+        _dragTarget.OnGhostDragBegin();
+        
         _dragGhost.transform.SetParent(_dragContainer);
         _dragGhost.transform.position = position;
         _dragGhost.transform.localScale = Vector3.one;
@@ -106,6 +108,7 @@ public class DragDropService : MonoBehaviour, IInitializable, IDisposable
         var eventData = new DropEventData(position, _dragObject);
 
         _dragTarget.ReleaseDraggableGhost(_dragGhost);
+        _dragTarget.OnGhostDragEnd();
 
         if (_rayHitProvider.TryGetHit(position, _dropTargetLayer, out var hitObject) &&
             hitObject.TryGetComponent<IDropTarget>(out var dropTarget))

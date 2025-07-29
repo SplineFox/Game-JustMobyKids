@@ -1,11 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Zenject;
-using DG.Tweening;
 using UnityEngine;
-using Random = UnityEngine.Random;
-using Sequence = DG.Tweening.Sequence;
 
 public class Tower : ElementContainer, IDropTarget
 {
@@ -16,49 +12,47 @@ public class Tower : ElementContainer, IDropTarget
     [SerializeField] private RectTransform _rectTransform;
     [SerializeField] private RectTransform _dragTransform;
     
+    private ITowerAnimator _animator;
+    private ITowerDropValidator _dropValidator;
+    private ITowerPlacementProvider _placementProvider;
+    
+    private float _towerHeight;
     private ElementPool _elementPool;
     private List<Element> _elements = new();
-
-    private float _towerHeight;
-    private Sequence _sequence;
     
-    public bool IsMaxHeightReached => _towerHeight >= _rectTransform.rect.height;
+    private bool IsMaxHeightReached => _towerHeight >= _rectTransform.rect.height;
 
     [Inject]
     public void Construct(ElementPool elementPool)
     {
         _elementPool = elementPool;
-    }
-
-    private void OnDestroy()
-    {
-        _sequence?.Kill();
+        
+        _animator = new TowerAnimator();
+        _dropValidator = new TowerDropValidator();
+        _placementProvider = new TowerPlacementProvider();
     }
 
     public override void AddElement(Element element)
     {
         _elements.Add(element);
-        
         element.SetContainer(this);
-        element.transform.localScale = Vector3.one;
-        
         ElementAdded?.Invoke();
-        
         RecalculateTowerHeight();
     }
 
     public override void RemoveElement(Element element)
     {
         var elementIndex = _elements.IndexOf(element);
-        
-        PlayRearrangeAnimation(elementIndex);
-        _elements.RemoveAt(elementIndex);
-        RecalculateTowerHeight();
+        _animator.PlayRearrangeAnimation(_elements, elementIndex, () =>
+        {
+            _elements.RemoveAt(elementIndex);
+            RecalculateTowerHeight();
+        });
     }
 
     public void OnDrop(DropEventData eventData)
     {
-        if (_sequence != null && _sequence.IsActive() ||
+        if (_animator.IsAnimationPlaying ||
             !eventData.GameObject.TryGetComponent<Element>(out var element) ||
             _elements.Contains(element))
         {
@@ -71,7 +65,7 @@ public class Tower : ElementContainer, IDropTarget
             return;
         }
 
-        if (_elements.Count == 0 || IsCollidedWithAnyElement(eventData))
+        if (_dropValidator.CanDropElement(_elements, element, eventData.Position))
         {
             HandleDrop(element, eventData.Position);
             return;
@@ -80,105 +74,30 @@ public class Tower : ElementContainer, IDropTarget
         HandleMissDrop(element, eventData.Position);
     }
 
+    private void HandleDrop(Element element, Vector2 dropPosition)
+    {
+        var elementPosition = _placementProvider.GetPositionForElement(_elements, element, dropPosition, _rectTransform);
+        
+        element.CanBeDragged = false;
+        element.RectTransform.SetParent(_dragTransform, true);
+        _animator.PlayAddAnimation(element, elementPosition, () =>
+        {
+            AddElement(element);
+            element.CanBeDragged = true;
+            element.RectTransform.SetParent(_rectTransform, true);
+        });
+    }
+    
     private void HandleMissDrop(Element element, Vector2 dropPosition)
     {
         element.SetContainer(null);
         element.CanBeDragged = false;
         element.RectTransform.SetParent(_dragTransform, true);
-        element.RectTransform.position = dropPosition;
-        element.PlayDisappearAnimation(() =>
+        _animator.PlayMissAnimation(element, dropPosition,() =>
         {
             _elementPool.Despawn(element);
             ElementMissed?.Invoke();
         });
-    }
-
-    private void HandleDrop(Element element, Vector2 dropPosition)
-    {
-        var lastElement = _elements.LastOrDefault();
-        var position = lastElement == null 
-            ? GetPositionForFirst(element, dropPosition) 
-            : GetPositionForLast(element, lastElement);
-        
-        PlayAddAnimation(element, position, () =>
-        {
-            AddElement(element);
-            element.RectTransform.SetParent(_rectTransform, true);
-        });
-    }
-
-    private bool IsCollidedWithAnyElement(DropEventData eventData)
-    {
-        foreach (var element in _elements)
-        {
-            if (RectTransformUtility.RectangleContainsScreenPoint(element.RectTransform, eventData.Position))
-                return true;
-        }
-        
-        return false;
-    }
-    
-    private Vector3 GetPositionForFirst(Element element, Vector2 dropPosition)
-    {
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(_rectTransform, dropPosition, null,
-            out var localPosition
-        );
-
-        var bottomY = - _rectTransform.rect.height * 0.5f;
-        
-        var posX = localPosition.x;
-        var posY = bottomY + element.RectTransform.rect.height * 0.5f;
-        var posZ = element.RectTransform.position.z;
-        var pos = new Vector3(posX, posY, posZ);
-
-        return _rectTransform.TransformPoint(pos);
-    }
-
-    private Vector3 GetPositionForLast(Element element, Element lastElement)
-    {
-        var lastHeight = lastElement.RectTransform.rect.height;
-        
-        var height = element.RectTransform.rect.height;
-        var width = element.RectTransform.rect.height;
-
-        var posXOffset = Random.Range(-1f, 1f) * (width * 0.5f);
-        var posX = lastElement.RectTransform.localPosition.x + posXOffset;
-        var posY = lastElement.RectTransform.localPosition.y + (lastHeight + height) * 0.5f;
-        var posZ = lastElement.RectTransform.localPosition.z;
-        var pos = new Vector3(posX, posY, posZ);
-        
-        return _rectTransform.TransformPoint(pos);
-    }
-    
-    private void PlayAddAnimation(Element element, Vector2 position, Action onComplete)
-    {
-        element.RectTransform.SetParent(_dragTransform, true);
-        element.RectTransform.localScale = Vector3.one;
-
-        _sequence?.Kill();
-        _sequence = DOTween.Sequence()
-            .Append(element.RectTransform.DOJump(position, 150f, 1, 0.5f))
-            .OnComplete(() => onComplete?.Invoke());
-    }
-
-    private void PlayRearrangeAnimation(int elementIndex, Action onComplete = null)
-    {
-        _sequence?.Kill();
-        _sequence = DOTween.Sequence();
-
-        var animationDuration = 0.5f;
-        for (var index = elementIndex; index < _elements.Count - 1; index++)
-        {
-            var element = _elements[index];
-            var nextElement = _elements[index + 1];
-            var newPosition = element.RectTransform.localPosition;
-
-            _sequence.Join(nextElement.RectTransform.DOLocalMove(newPosition, animationDuration)
-                .SetEase(Ease.InBack));
-            animationDuration += 0.1f;
-        }
-        
-        _sequence.OnComplete(() => onComplete?.Invoke());
     }
 
     private void RecalculateTowerHeight()

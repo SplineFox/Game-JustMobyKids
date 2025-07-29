@@ -14,8 +14,13 @@ public class SaveService : ISaveService
     {
         try
         {
+            foreach (var container in _containers)
+                container.Value.Serialize();
+            
             var saveData = _containers.Values.ToList();
-            File.WriteAllText(_savePath, JsonConvert.SerializeObject(saveData, Formatting.Indented));
+            var json = JsonConvert.SerializeObject(saveData);
+            
+            File.WriteAllText(_savePath, json);
         }
         catch (Exception e)
         {

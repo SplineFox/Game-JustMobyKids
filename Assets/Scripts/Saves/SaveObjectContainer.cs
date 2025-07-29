@@ -1,21 +1,29 @@
-using System;
 using UnityEngine;
+using Newtonsoft.Json;
 
 /// <summary>
 /// Обёртка над ISaveObject для сериализации/десериализации.
 /// </summary>
-[Serializable]
+[JsonObject(MemberSerialization.OptIn)]
 public class SaveObjectContainer
 {
-    [SerializeField] private string _id;
-    [SerializeField] private string _json;
+    [JsonProperty] private string _id;
+    [JsonProperty] private string _json;
     
-    [NonSerialized] private bool _deserialized;
-    [NonSerialized] private ISaveObject _saveObject;
+    private bool _deserialized;
+    private ISaveObject _saveObject;
     
     public string Id => _id;
     public bool Deserialized => _deserialized;
     public ISaveObject SaveObject => _saveObject;
+    
+    [JsonConstructor]
+    public SaveObjectContainer(string id, string json)
+    {
+        _id = id;
+        _json = json;
+        _deserialized = false;
+    }
     
     public SaveObjectContainer(string id, ISaveObject saveObject)
     {

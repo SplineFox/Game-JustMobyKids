@@ -12,6 +12,7 @@ public class Tower : ElementContainer, IInitializable, IDropTarget
     [SerializeField] private RectTransform _rectTransform;
     [SerializeField] private RectTransform _dragTransform;
     
+    private ISaveProvider _saveProvider;
     private ITowerAnimator _animator;
     private ITowerDropValidator _dropValidator;
     private ITowerPlacementProvider _placementProvider;
@@ -30,7 +31,8 @@ public class Tower : ElementContainer, IInitializable, IDropTarget
         ISaveProvider saveProvider)
     {
         _elementPool = elementPool;
-        _save = saveProvider.GetSaveObject<TowerSave>("tower");
+        _elementConfigurations = elementConfigurations;
+        _saveProvider = saveProvider;
         
         _animator = new TowerAnimator();
         _dropValidator = new TowerDropValidator();
@@ -39,6 +41,8 @@ public class Tower : ElementContainer, IInitializable, IDropTarget
 
     public void Initialize()
     {
+        _save = _saveProvider.GetSaveObject<TowerSave>("tower");
+
         foreach (var elementSave in _save.ElementsData)
         {
             var configuration = _elementConfigurations.GetConfiguration(elementSave.ConfigurationId);

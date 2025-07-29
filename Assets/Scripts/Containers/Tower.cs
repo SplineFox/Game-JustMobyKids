@@ -50,6 +50,8 @@ public class Tower : ElementContainer, IDropTarget
     {
         var elementIndex = _elements.IndexOf(element);
         _elements.RemoveAt(elementIndex);
+        
+        RecalculateTowerHeight();
     }
 
     public void OnDrop(DropEventData eventData)
@@ -68,33 +70,38 @@ public class Tower : ElementContainer, IDropTarget
             return;
         }
 
-        if (_elements.Count == 0)
+        if (_elements.Count == 0 || IsCollidedWithAnyElement(eventData))
         {
-            AddElement(element);
-            element.RectTransform.SetParent(_dragTransform, true);
-            DropFirst(element, eventData.Position);
-            element.RectTransform.SetParent(_rectTransform, true);
-            return;
-        }
-
-        if (IsCollidedWithAnyElement(eventData))
-        {
-            var lastElement = _elements.Last();
-            AddElement(element);
-            element.RectTransform.SetParent(_dragTransform, true);
-            DropLast(element, lastElement);
-            element.RectTransform.SetParent(_rectTransform, true);
+            HandleDrop(element, eventData.Position);
             return;
         }
         
+        HandleMissDrop(element, eventData.Position);
+    }
+
+    private void HandleMissDrop(Element element, Vector2 dropPosition)
+    {
         element.SetContainer(null);
         element.RectTransform.SetParent(_dragTransform, true);
-        element.RectTransform.position = eventData.Position;
+        element.RectTransform.position = dropPosition;
         element.PlayDisappearAnimation(() =>
         {
             _elementPool.Despawn(element);
             ElementMissed?.Invoke();
         });
+    }
+
+    private void HandleDrop(Element element, Vector2 dropPosition)
+    {
+        var lastElement = _elements.LastOrDefault();
+        
+        AddElement(element);
+        element.RectTransform.SetParent(_dragTransform, true);
+        element.RectTransform.position = lastElement == null 
+            ? GetDropFirstPosition(element, dropPosition) 
+            : GetDropLastPosition(element, lastElement);
+        
+        element.RectTransform.SetParent(_rectTransform, true);
     }
 
     private bool IsCollidedWithAnyElement(DropEventData eventData)
@@ -108,7 +115,7 @@ public class Tower : ElementContainer, IDropTarget
         return false;
     }
     
-    private void DropFirst(Element element, Vector2 dropPosition)
+    private Vector3 GetDropFirstPosition(Element element, Vector2 dropPosition)
     {
         RectTransformUtility.ScreenPointToLocalPointInRectangle(_rectTransform, dropPosition, null,
             out var localPosition
@@ -121,10 +128,10 @@ public class Tower : ElementContainer, IDropTarget
         var posZ = element.RectTransform.position.z;
         var pos = new Vector3(posX, posY, posZ);
 
-        element.RectTransform.position = _rectTransform.TransformPoint(pos);
+        return _rectTransform.TransformPoint(pos);
     }
 
-    private void DropLast(Element element, Element lastElement)
+    private Vector3 GetDropLastPosition(Element element, Element lastElement)
     {
         var lastHeight = lastElement.RectTransform.rect.height;
         
@@ -137,7 +144,7 @@ public class Tower : ElementContainer, IDropTarget
         var posZ = lastElement.RectTransform.localPosition.z;
         var pos = new Vector3(posX, posY, posZ);
         
-        element.RectTransform.position = _rectTransform.TransformPoint(pos);
+        return _rectTransform.TransformPoint(pos);
     }
 
     private void RecalculateTowerHeight()

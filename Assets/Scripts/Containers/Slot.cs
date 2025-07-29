@@ -29,6 +29,7 @@ public class Slot : ElementContainer
     {
         _element = element;
         _element.SetContainer(this);
+        _element.CanBeDestroyed = false;
         
         _element.DragBegin += ElementDragBegin;
         _element.DragEnd += ElementDragEnd;

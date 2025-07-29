@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class Hole : MonoBehaviour, IDropTarget
 {
+    public event Action ElementCantBeDestroyed;
+    
     [SerializeField] private Collider2D _collider2D;
     [SerializeField] private RectTransform _maskContainer;
     [SerializeField] private RectTransform _dragContainer;
@@ -34,6 +36,12 @@ public class Hole : MonoBehaviour, IDropTarget
             !_collider2D.OverlapPoint(eventData.Position) ||
             !eventData.GameObject.TryGetComponent<Element>(out var element))
         {
+            return;
+        }
+
+        if (!element.CanBeDestroyed)
+        {
+            ElementCantBeDestroyed?.Invoke();
             return;
         }
 

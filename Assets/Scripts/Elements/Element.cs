@@ -1,8 +1,8 @@
 using System;
+using Zenject;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
-using Zenject;
 
 public class Element : MonoBehaviour, IDragTarget
 {
@@ -17,6 +17,7 @@ public class Element : MonoBehaviour, IDragTarget
     private ElementConfiguration _configuration;
     private Tween _tween;
 
+    public bool CanBeDestroyed { get; set; }
     public bool CanBeDragged { get; set; }
     public RectTransform RectTransform => _rectTransform;
     public ElementConfiguration Configuration => _configuration;

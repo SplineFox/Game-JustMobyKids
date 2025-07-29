@@ -34,9 +34,12 @@ public class Tower : ElementContainer, IDropTarget
 
     public override void AddElement(Element element)
     {
-        _elements.Add(element);
         element.SetContainer(this);
+        element.CanBeDestroyed = true;
+        
+        _elements.Add(element);
         ElementAdded?.Invoke();
+        
         RecalculateTowerHeight();
     }
 

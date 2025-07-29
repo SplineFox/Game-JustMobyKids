@@ -1365,7 +1365,7 @@ GameObject:
   - component: {fileID: 1365672003}
   - component: {fileID: 1365672002}
   m_Layer: 5
-  m_Name: ScrollArea
+  m_Name: ScrollContainer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1783,7 +1783,7 @@ GameObject:
   - component: {fileID: 1622008204}
   - component: {fileID: 1622008206}
   m_Layer: 5
-  m_Name: Container
+  m_Name: ScrollArea
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2007,14 +2007,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _gameConfiguration: {fileID: 11400000, guid: 843904b56a6e4ce4998bd65916351b4a, type: 2}
+  _localizationConfiguration: {fileID: 11400000, guid: 456cc19fc5679fb4ab6c6c2b7c7521e2, type: 2}
   _elementConfigurationDatabase: {fileID: 11400000, guid: 27ae1c06004811f48b56490fdb103ad8, type: 2}
   _elementPrefab: {fileID: 7375370660446691450, guid: 6a413e191068a474ebb264d48471d4b2, type: 3}
   _slotPrefab: {fileID: 2273750763163130830, guid: 4f646b4c116646e47b909731c8fe3c05, type: 3}
-  _dragDropService: {fileID: 725329658}
-  _slotContainer: {fileID: 1622008206}
   _hole: {fileID: 243772905}
   _tower: {fileID: 1087519482}
+  _scrollArea: {fileID: 1622008206}
   _elementGhost: {fileID: 699085498}
+  _dragDropService: {fileID: 725329658}
 --- !u!1 &1958610095
 GameObject:
   m_ObjectHideFlags: 0

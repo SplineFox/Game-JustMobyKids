@@ -4,14 +4,14 @@ using Zenject;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class SlotContainer : MonoBehaviour, IInitializable, IDisposable
+public class ScrollArea : MonoBehaviour, IInitializable, IDisposable
 {
     [SerializeField] private ScrollRect _scrollRect;
     
     private GameConfiguration _gameConfiguration;
     private SlotFactory _slotFactory;
     
-    private List<Slot> _slots = new();
+    private readonly List<Slot> _slots = new();
 
     [Inject]
     public void Construct(GameConfiguration gameConfiguration, SlotFactory slotFactory)

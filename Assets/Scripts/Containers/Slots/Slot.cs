@@ -36,14 +36,13 @@ public class Slot : ElementContainer
         
         _element.RectTransform.SetParent(_rectTransform);
         
-        _element.RectTransform.localScale = Vector3.one;
-        
         _element.RectTransform.offsetMin = Vector2.zero;
         _element.RectTransform.offsetMax = Vector2.zero;
         
         _element.RectTransform.anchorMin = Vector2.one * 0.5f;
         _element.RectTransform.anchorMax = Vector2.one * 0.5f;
         
+        _element.RectTransform.localScale = Vector3.one;
         _element.RectTransform.sizeDelta = _rectTransform.sizeDelta;
     }
 

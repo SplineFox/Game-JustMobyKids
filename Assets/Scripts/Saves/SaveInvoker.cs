@@ -30,23 +30,6 @@ public class SaveInvoker : IInitializable, IDisposable
             .AddTo(_disposables);
     }
 
-    private void OnApplicationFocus(bool hasFocus)
-    {
-        if (hasFocus || !_isInitialized)
-            return;
-
-        _saveService.Save();
-        Debug.Log("Save");
-    }
-
-    private void OnApplicationPause(bool paused)
-    {
-        if (!paused || !_isInitialized)
-            return;
-
-        Debug.Log("Save");
-    }
-
     public void Dispose()
     {
         _disposables?.Dispose();

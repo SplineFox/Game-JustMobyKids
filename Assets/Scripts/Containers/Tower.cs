@@ -39,7 +39,6 @@ public class Tower : ElementContainer, IDropTarget
         _elements.Add(element);
         
         element.SetContainer(this);
-        element.RectTransform.SetParent(_rectTransform, true);
         element.transform.localScale = Vector3.one;
         
         ElementAdded?.Invoke();
@@ -55,6 +54,8 @@ public class Tower : ElementContainer, IDropTarget
 
     public void OnDrop(DropEventData eventData)
     {
+        Debug.Log(eventData.Position);
+        
         if (_sequence != null && _sequence.IsPlaying() ||
             !eventData.GameObject.TryGetComponent<Element>(out var element))
         {
@@ -70,7 +71,9 @@ public class Tower : ElementContainer, IDropTarget
         if (_elements.Count == 0)
         {
             AddElement(element);
+            element.RectTransform.SetParent(_dragTransform, true);
             DropFirst(element, eventData.Position);
+            element.RectTransform.SetParent(_rectTransform, true);
             return;
         }
 
@@ -80,6 +83,7 @@ public class Tower : ElementContainer, IDropTarget
             AddElement(element);
             element.RectTransform.SetParent(_dragTransform, true);
             DropLast(element, lastElement);
+            element.RectTransform.SetParent(_rectTransform, true);
             return;
         }
         
@@ -109,30 +113,31 @@ public class Tower : ElementContainer, IDropTarget
         RectTransformUtility.ScreenPointToLocalPointInRectangle(_rectTransform, dropPosition, null,
             out var localPosition
         );
-        
-        var parentHeight = _rectTransform.rect.height;
-        var childHeight = element.RectTransform.rect.height;
-        
-        var posX = localPosition.x; 
-        var posY = -parentHeight * 0.5f + childHeight * 0.5f;
-        var posZ = element.RectTransform.localPosition.z;
 
-        element.RectTransform.localPosition = new Vector3(posX, posY, posZ);
+        var bottomY = - _rectTransform.rect.height * 0.5f;
+        
+        var posX = localPosition.x;
+        var posY = bottomY + element.RectTransform.rect.height * 0.5f;
+        var posZ = element.RectTransform.position.z;
+        var pos = new Vector3(posX, posY, posZ);
+
+        element.RectTransform.position = _rectTransform.TransformPoint(pos);
     }
-    
+
     private void DropLast(Element element, Element lastElement)
     {
         var lastHeight = lastElement.RectTransform.rect.height;
         
         var height = element.RectTransform.rect.height;
         var width = element.RectTransform.rect.height;
+
+        var posXOffset = Random.Range(-1f, 1f) * (width * 0.5f);
+        var posX = lastElement.RectTransform.localPosition.x + posXOffset;
+        var posY = lastElement.RectTransform.localPosition.y + (lastHeight + height) * 0.5f;
+        var posZ = lastElement.RectTransform.localPosition.z;
+        var pos = new Vector3(posX, posY, posZ);
         
-        var posXOffset = Random.Range(-1f, 1f) * (width / 2f);
-        var posX = lastElement.RectTransform.position.x + posXOffset;
-        var posY = lastElement.RectTransform.position.y + lastHeight / 2f + height / 2f;
-        var posZ = element.RectTransform.position.z;
-        
-        element.RectTransform.position = new Vector3(posX, posY, posZ);
+        element.RectTransform.position = _rectTransform.TransformPoint(pos);
     }
 
     private void RecalculateTowerHeight()

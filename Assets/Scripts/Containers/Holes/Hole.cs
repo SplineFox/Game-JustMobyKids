@@ -1,11 +1,13 @@
 using System;
 using Zenject;
 using DG.Tweening;
+using UniRx;
 using UnityEngine;
 
 public class Hole : MonoBehaviour, IDropTarget
 {
-    public event Action ElementCantBeDestroyed;
+    public readonly Subject<Unit> OnElementDestroyed = new();
+    public readonly Subject<Unit> OnElementDestroyRejected = new();
     
     [SerializeField] private Collider2D _collider2D;
     [SerializeField] private RectTransform _maskContainer;
@@ -41,7 +43,7 @@ public class Hole : MonoBehaviour, IDropTarget
 
         if (!element.CanBeDestroyed)
         {
-            ElementCantBeDestroyed?.Invoke();
+            OnElementDestroyRejected.OnNext(Unit.Default);
             return;
         }
 
@@ -53,6 +55,7 @@ public class Hole : MonoBehaviour, IDropTarget
         {
             _elementPool.Despawn(_element);
             _element = null;
+            OnElementDestroyed.OnNext(Unit.Default);
         });
     }
 

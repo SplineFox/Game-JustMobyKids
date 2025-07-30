@@ -1,13 +1,14 @@
 using System;
 using System.Collections.Generic;
+using UniRx;
 using Zenject;
 using UnityEngine;
 
 public class Tower : ElementContainer, IInitializable, IDropTarget
 {
-    public event Action ElementDroppedOnMaxTower;
-    public event Action ElementMissed;
-    public event Action ElementAdded;
+    public readonly Subject<Unit> OnElementDroppedOnMaxTower = new();
+    public readonly Subject<Unit> OnElementMissed = new();
+    public readonly Subject<Unit> OnElementAdded = new();
     
     [SerializeField] private RectTransform _rectTransform;
     [SerializeField] private RectTransform _dragTransform;
@@ -71,7 +72,7 @@ public class Tower : ElementContainer, IInitializable, IDropTarget
             AnchoredPosition = element.RectTransform.anchoredPosition
         });
 
-        ElementAdded?.Invoke();
+        OnElementAdded.OnNext(Unit.Default);
         RecalculateTowerHeight();
     }
 
@@ -100,7 +101,7 @@ public class Tower : ElementContainer, IInitializable, IDropTarget
 
         if (IsMaxHeightReached)
         {
-            ElementDroppedOnMaxTower?.Invoke();
+            OnElementDroppedOnMaxTower.OnNext(Unit.Default);
             return;
         }
 
@@ -135,7 +136,7 @@ public class Tower : ElementContainer, IInitializable, IDropTarget
         _animator.PlayMissAnimation(element, dropPosition,() =>
         {
             _elementPool.Despawn(element);
-            ElementMissed?.Invoke();
+            OnElementMissed.OnNext(Unit.Default);
         });
     }
 

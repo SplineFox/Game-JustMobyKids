@@ -17,6 +17,7 @@ public class GameInstaller : MonoInstaller
     [SerializeField] private Tower _tower;
     [SerializeField] private ElementGhost _elementGhost;
     [SerializeField] private DragDropService _dragDropService;
+    [SerializeField] private CanvasScaleProvider _canvasScaleProvider;
     
     public override void InstallBindings()
     {
@@ -58,6 +59,12 @@ public class GameInstaller : MonoInstaller
 
     private void BindSceneDependencies()
     {
+        Container.Bind<CanvasScaleProvider>().FromInstance(_canvasScaleProvider).AsSingle();
+        
+        Container.BindInterfacesTo<TowerAnimator>().FromNew().AsSingle();
+        Container.BindInterfacesTo<TowerDropValidator>().FromNew().AsSingle();
+        Container.BindInterfacesTo<TowerPlacementProvider>().FromNew().AsSingle();
+        
         Container.BindInterfacesAndSelfTo<Hole>().FromInstance(_hole);
         Container.BindInterfacesAndSelfTo<Tower>().FromInstance(_tower);
         Container.BindInterfacesAndSelfTo<ElementGhost>().FromInstance(_elementGhost).AsSingle();

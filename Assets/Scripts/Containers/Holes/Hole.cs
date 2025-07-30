@@ -19,12 +19,15 @@ public class Hole : MonoBehaviour, IDropTarget
 
     private ElementPool _elementPool;
     private Element _element;
+    
+    private CanvasScaleProvider _scaleProvider;
     private Sequence _sequence;
 
     [Inject]
-    public void Construct(ElementPool elementPool)
+    public void Construct(ElementPool elementPool, CanvasScaleProvider scaleProvider)
     {
         _elementPool = elementPool;
+        _scaleProvider = scaleProvider;
     }
 
     private void OnDestroy()
@@ -64,9 +67,11 @@ public class Hole : MonoBehaviour, IDropTarget
         _element.RectTransform.SetParent(_dragContainer, true);
         _element.RectTransform.localScale = Vector3.one;
 
+        var jumpPower = _scaleProvider.Scale.y * 700f;
+
         _sequence?.Kill();
         _sequence = DOTween.Sequence()
-            .Append(_element.RectTransform.DOJump(_animationEndPoint.position, 700f, 1, _animationDuration))
+            .Append(_element.RectTransform.DOJump(_animationEndPoint.position, jumpPower, 1, _animationDuration))
             .Insert(0f,
                 _element.RectTransform.DOLocalRotate(Vector3.forward * 360f, _animationDuration,
                     RotateMode.FastBeyond360))

@@ -2,18 +2,27 @@ using System;
 using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class TowerAnimator : ITowerAnimator
 {
     private Sequence _sequence;
-
+    private CanvasScaleProvider _scaleProvider;
+    
     public bool IsAnimationPlaying => _sequence != null && _sequence.IsActive();
 
+    public TowerAnimator(CanvasScaleProvider scaleProvider)
+    {
+        _scaleProvider = scaleProvider;
+    }
+    
     public void PlayAddAnimation(Element element, Vector2 dropPosition, Action onComplete = null)
     {
+        var jumpPower = _scaleProvider.Scale.y * 150f;
+        
         _sequence?.Kill();
         _sequence = DOTween.Sequence()
-            .Append(element.RectTransform.DOJump(dropPosition, 150f, 1, 0.5f))
+            .Append(element.RectTransform.DOJump(dropPosition, jumpPower, 1, 0.5f))
             .OnComplete(() => onComplete?.Invoke());
     }
     

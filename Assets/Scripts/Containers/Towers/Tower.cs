@@ -32,15 +32,18 @@ public class Tower : ElementContainer, IInitializable, IDropTarget
 
     [Inject]
     public void Construct(ElementPool elementPool, ElementConfigurationDatabase elementConfigurations,
+        ITowerAnimator animator, 
+        ITowerDropValidator dropValidator, 
+        ITowerPlacementProvider placementProvider,
         ISaveProvider saveProvider)
     {
         _elementPool = elementPool;
         _elementConfigurations = elementConfigurations;
         _saveProvider = saveProvider;
         
-        _animator = new TowerAnimator();
-        _dropValidator = new TowerDropValidator();
-        _placementProvider = new TowerPlacementProvider();
+        _animator = animator;
+        _dropValidator = dropValidator;
+        _placementProvider = placementProvider;
     }
 
     public void Initialize()

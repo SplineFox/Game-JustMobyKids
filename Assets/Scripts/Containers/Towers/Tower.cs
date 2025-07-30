@@ -1,17 +1,17 @@
 using System;
-using System.Collections.Generic;
 using UniRx;
 using Zenject;
 using UnityEngine;
+using System.Collections.Generic;
 
 public class Tower : ElementContainer, IInitializable, IDropTarget
 {
-    public readonly Subject<Unit> OnElementDroppedOnMaxTower = new();
-    public readonly Subject<Unit> OnElementMissed = new();
-    public readonly Subject<Unit> OnElementAdded = new();
-    
     [SerializeField] private RectTransform _rectTransform;
     [SerializeField] private RectTransform _dragTransform;
+    
+    private readonly Subject<Unit> _onElementAdded = new();
+    private readonly Subject<Unit> _onElementMissed = new();
+    private readonly Subject<Unit> _onElementDroppedOnMaxTower = new();
     
     private ISaveProvider _saveProvider;
     private ITowerAnimator _animator;
@@ -25,6 +25,9 @@ public class Tower : ElementContainer, IInitializable, IDropTarget
     private float _towerHeight;
     private List<Element> _elements = new();
     
+    public IObservable<Unit> OnElementAdded => _onElementAdded;
+    public IObservable<Unit> OnElementMissed => _onElementMissed;
+    public IObservable<Unit> OnElementDroppedOnMaxTower => _onElementDroppedOnMaxTower;
     private bool IsMaxHeightReached => _towerHeight >= _rectTransform.rect.height;
 
     [Inject]
@@ -72,7 +75,7 @@ public class Tower : ElementContainer, IInitializable, IDropTarget
             AnchoredPosition = element.RectTransform.anchoredPosition
         });
 
-        OnElementAdded.OnNext(Unit.Default);
+        _onElementAdded.OnNext(Unit.Default);
         RecalculateTowerHeight();
     }
 
@@ -101,7 +104,7 @@ public class Tower : ElementContainer, IInitializable, IDropTarget
 
         if (IsMaxHeightReached)
         {
-            OnElementDroppedOnMaxTower.OnNext(Unit.Default);
+            _onElementDroppedOnMaxTower.OnNext(Unit.Default);
             return;
         }
 
@@ -136,7 +139,7 @@ public class Tower : ElementContainer, IInitializable, IDropTarget
         _animator.PlayMissAnimation(element, dropPosition,() =>
         {
             _elementPool.Despawn(element);
-            OnElementMissed.OnNext(Unit.Default);
+            _onElementMissed.OnNext(Unit.Default);
         });
     }
 

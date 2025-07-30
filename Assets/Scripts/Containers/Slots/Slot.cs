@@ -1,18 +1,22 @@
+using System;
 using UniRx;
 using Zenject;
 using UnityEngine;
 
 public class Slot : ElementContainer
 {
-    public readonly Subject<Unit> OnInteractionBegin = new();
-    public readonly Subject<Unit> OnInteractionEnd = new();
-    
     [SerializeField] private RectTransform _rectTransform;
     
-    private CompositeDisposable _elementSubscriptions = new();
+    private readonly Subject<Unit> _onInteractionBegin = new();
+    private readonly Subject<Unit> _onInteractionEnd = new();
+    private readonly CompositeDisposable _elementSubscriptions = new();
+    
     private ElementConfiguration _elementConfiguration;
     private ElementPool _elementPool;
     private Element _element;
+    
+    public IObservable<Unit> OnInteractionBegin => _onInteractionBegin;
+    public IObservable<Unit> OnInteractionEnd => _onInteractionEnd;
 
     [Inject]
     public void Construct(ElementConfiguration elementConfiguration, ElementPool elementPool)
@@ -46,11 +50,11 @@ public class Slot : ElementContainer
         _elementSubscriptions.Clear();
         
         _element.OnDragBegin
-            .Subscribe(_ => OnInteractionBegin.OnNext(Unit.Default))
+            .Subscribe(_ => _onInteractionBegin.OnNext(Unit.Default))
             .AddTo(_elementSubscriptions);
 
         _element.OnDragEnd
-            .Subscribe(_ => OnInteractionEnd.OnNext(Unit.Default))
+            .Subscribe(_ => _onInteractionEnd.OnNext(Unit.Default))
             .AddTo(_elementSubscriptions);
     }
 

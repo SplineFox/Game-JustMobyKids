@@ -7,11 +7,11 @@ using UnityEngine.UI;
 
 public class Element : MonoBehaviour, IDragTarget
 {
-    private readonly Subject<Unit> _onDragBegin = new();
-    private readonly Subject<Unit> _onDragEnd = new();
-
     [SerializeField] private RectTransform _rectTransform;
     [SerializeField] private Image _image;
+    
+    private readonly Subject<Unit> _onDragBegin = new();
+    private readonly Subject<Unit> _onDragEnd = new();
 
     private ElementGhost _ghost;
     private ElementContainer _container;
@@ -52,26 +52,6 @@ public class Element : MonoBehaviour, IDragTarget
         _container = container;
     }
 
-    public void PlayAppearAnimation(Action onComplete = null)
-    {
-        _tween?.Kill();
-        
-        _rectTransform.localScale = Vector3.zero;
-        _tween = _rectTransform.DOScale(Vector3.one, 1f)
-            .SetEase(Ease.OutBack)
-            .OnComplete(() => onComplete?.Invoke());
-    }
-
-    public void PlayDisappearAnimation(Action onComplete = null)
-    {
-        _tween?.Kill();
-        
-        _rectTransform.localScale = Vector3.one;
-        _tween = _rectTransform.DOScale(Vector3.zero, 0.5f)
-            .SetEase(Ease.InBack)
-            .OnComplete(() => onComplete?.Invoke());
-    }
-
     public void OnGhostDragBegin()
     {
         _image.color = new Color(_image.color.r, _image.color.g, _image.color.b, 0.5f);
@@ -93,5 +73,25 @@ public class Element : MonoBehaviour, IDragTarget
     public void ReleaseDraggableGhost(GameObject draggableGhost)
     {
         _ghost.Hide();
+    }
+    
+    public void PlayAppearAnimation(Action onComplete = null)
+    {
+        _tween?.Kill();
+        
+        _rectTransform.localScale = Vector3.zero;
+        _tween = _rectTransform.DOScale(Vector3.one, 1f)
+            .SetEase(Ease.OutBack)
+            .OnComplete(() => onComplete?.Invoke());
+    }
+
+    public void PlayDisappearAnimation(Action onComplete = null)
+    {
+        _tween?.Kill();
+        
+        _rectTransform.localScale = Vector3.one;
+        _tween = _rectTransform.DOScale(Vector3.zero, 0.5f)
+            .SetEase(Ease.InBack)
+            .OnComplete(() => onComplete?.Invoke());
     }
 }

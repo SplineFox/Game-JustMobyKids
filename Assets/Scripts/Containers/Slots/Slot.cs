@@ -36,9 +36,8 @@ public class Slot : ElementContainer
         _element.SetContainer(this);
         _element.CanBeDestroyed = false;
         
-        FitElementToSlot(element);
-        
         _elementSubscriptions.Clear();
+        
         _element.OnDragBegin
             .Subscribe(_ => _onInteractionBegin.OnNext(Unit.Default))
             .AddTo(_elementSubscriptions);
@@ -46,6 +45,8 @@ public class Slot : ElementContainer
         _element.OnDragEnd
             .Subscribe(_ => _onInteractionEnd.OnNext(Unit.Default))
             .AddTo(_elementSubscriptions);
+        
+        FitElementToSlot(element);
     }
 
     public override void RemoveElement(Element element)

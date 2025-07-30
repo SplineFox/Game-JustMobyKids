@@ -1,21 +1,21 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using UniRx;
 
 public class LocalizationService : ILocalizationService
 {
-    public event Action LocaleChanged;
-    
     private readonly ILocalizationLoader _localizationLoader;
+    private readonly ReactiveProperty<string> _currentLocaleCode = new();
     private Dictionary<string, string> _localizedTexts = new();
 
-    public string CurrentLocaleCode { get; private set; }
-
+    public IReadOnlyReactiveProperty<string> CurrentLocaleCode => _currentLocaleCode;
+    
     public LocalizationService(ILocalizationLoader localizationLoader)
     {
         _localizationLoader = localizationLoader;
     }
-    
+
     public void Initialize(string localeCode)
     {
         SetLocaleCode(localeCode);
@@ -23,14 +23,13 @@ public class LocalizationService : ILocalizationService
 
     public void SetLocaleCode(string localeCode)
     {
-        if (CurrentLocaleCode == localeCode)
+        if (_currentLocaleCode.Value == localeCode)
             return;
         
-        CurrentLocaleCode = localeCode;
         var localizationData = _localizationLoader.LoadLocalizationData(localeCode);
-        _localizedTexts = localizationData.ToDictionary(k => k.Id, v => v.Text);
         
-        LocaleChanged?.Invoke();
+        _localizedTexts = localizationData.ToDictionary(k => k.Id, v => v.Text);
+        _currentLocaleCode.Value = localeCode;
     }
 
     public string GetText(string id)

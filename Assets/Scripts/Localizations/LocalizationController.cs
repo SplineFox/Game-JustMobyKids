@@ -1,4 +1,5 @@
 using System;
+using UniRx;
 using Zenject;
 
 public class LocalizationController : IInitializable, IDisposable
@@ -8,6 +9,7 @@ public class LocalizationController : IInitializable, IDisposable
     private readonly ISaveProvider _saveProvider;
     
     private LocalizationSave _save;
+    private IDisposable _disposable;
 
     public LocalizationController(LocalizationConfiguration configuration,
         ILocalizationService localizationService, ISaveProvider saveProvider)
@@ -26,16 +28,12 @@ public class LocalizationController : IInitializable, IDisposable
             : _save.LocaleCode;
 
         _localizationService.Initialize(localeCode);
-        _localizationService.LocaleChanged += OnLocaleChanged;
+        _disposable = _localizationService.CurrentLocaleCode
+            .Subscribe(newLocaleCode => _save.LocaleCode = newLocaleCode);
     }
 
     public void Dispose()
     {
-        _localizationService.LocaleChanged -= OnLocaleChanged;
-    }
-
-    private void OnLocaleChanged()
-    {
-        _save.LocaleCode = _localizationService.CurrentLocaleCode;
+        _disposable?.Dispose();
     }
 }

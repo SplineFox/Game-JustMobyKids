@@ -1,10 +1,9 @@
 using System;
+using UniRx;
 
 public interface ILocalizationService
 {
-    event Action LocaleChanged;
-    
-    string CurrentLocaleCode { get; }
+    IReadOnlyReactiveProperty<string> CurrentLocaleCode { get; }
     
     void Initialize(string localeCode);
     void SetLocaleCode(string localeCode);

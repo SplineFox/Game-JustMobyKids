@@ -36,19 +36,9 @@ public class Slot : ElementContainer
         _element.SetContainer(this);
         _element.CanBeDestroyed = false;
         
-        _element.RectTransform.SetParent(_rectTransform);
-        
-        _element.RectTransform.offsetMin = Vector2.zero;
-        _element.RectTransform.offsetMax = Vector2.zero;
-        
-        _element.RectTransform.anchorMin = Vector2.one * 0.5f;
-        _element.RectTransform.anchorMax = Vector2.one * 0.5f;
-        
-        _element.RectTransform.localScale = Vector3.one;
-        _element.RectTransform.sizeDelta = _rectTransform.sizeDelta;
+        FitElementToSlot(element);
         
         _elementSubscriptions.Clear();
-        
         _element.OnDragBegin
             .Subscribe(_ => _onInteractionBegin.OnNext(Unit.Default))
             .AddTo(_elementSubscriptions);
@@ -76,5 +66,19 @@ public class Slot : ElementContainer
         
         if(shouldAnimate)
             element.PlayAppearAnimation();
+    }
+
+    private void FitElementToSlot(Element element)
+    {
+        element.RectTransform.SetParent(_rectTransform);
+        
+        element.RectTransform.offsetMin = Vector2.zero;
+        element.RectTransform.offsetMax = Vector2.zero;
+        
+        element.RectTransform.anchorMin = Vector2.one * 0.5f;
+        element.RectTransform.anchorMax = Vector2.one * 0.5f;
+        
+        element.RectTransform.localScale = Vector3.one;
+        element.RectTransform.sizeDelta = _rectTransform.sizeDelta;
     }
 }

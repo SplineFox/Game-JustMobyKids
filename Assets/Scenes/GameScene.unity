@@ -965,7 +965,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cc23625b47344990a4612037b3e76a4a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _holdTimeToDrag: 0.2
+  _holdTimeToDrag: 0.1
   _holdAllowedOffset: 30
 --- !u!1 &812715150
 GameObject:

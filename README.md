@@ -8,6 +8,8 @@
 - Zenject
 - UniRx
 
+Интерактивная документация доступна в [deepwiki](https://deepwiki.com/SplineFox/Game-JustMobyKids).
+
 ## Drag & Drop
 Координатором всех взаимодействий с перетаскиваемыми элементами является `DragDropService`.
 Логику работы данной системы можно разделить на:

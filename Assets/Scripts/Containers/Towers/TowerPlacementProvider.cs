@@ -6,7 +6,8 @@ public class TowerPlacementProvider : ITowerPlacementProvider
 {
     private const float PlacementThreshold = 0.25f;
     
-    public Vector3 GetPositionForElement(IReadOnlyList<Element> elements, Element dropElement, Vector2 dropPosition, RectTransform towerRect)
+    public Vector3 GetPositionForElement(IReadOnlyList<Element> elements, Element dropElement, Vector2 dropPosition,
+        RectTransform towerRect)
     {
         if (elements.Count == 0)
             return GetPositionForFirst(dropElement, dropPosition, towerRect);

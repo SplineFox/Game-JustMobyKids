@@ -83,11 +83,13 @@ public class Tower : ElementContainer, IInitializable, IDropTarget
     {
         var elementIndex = _elements.IndexOf(element);
         
+        SetElementsDraggable(false);
         _animator.PlayRearrangeAnimation(_elements, elementIndex, () =>
         {
             _save.ElementsData.RemoveAt(elementIndex);
             _elements.RemoveAt(elementIndex);
             
+            SetElementsDraggable(true);
             RefreshSavedPositions();
             RecalculateTowerHeight();
         });
@@ -160,5 +162,11 @@ public class Tower : ElementContainer, IInitializable, IDropTarget
             
             elementData.AnchoredPosition = element.RectTransform.anchoredPosition;
         }
+    }
+
+    private void SetElementsDraggable(bool isDraggable)
+    {
+        foreach (var element in _elements)
+            element.CanBeDragged = isDraggable;
     }
 }

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 544c5546646e444f9337066451328ef7, type: 3}
   m_Name: LocalizationConfiguration
   m_EditorClassIdentifier: 
-  _defaultLocaleCode: en
+  _defaultLocaleCode: ru
   _localeCodes:
   - ru
   - en

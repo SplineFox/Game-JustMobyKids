@@ -1,11 +1,11 @@
 [
   {
     "Id": "element_add",
-    "Text": "Вы попали!"
+    "Text": "Элемент добавлен"
   },
   {
     "Id": "element_miss",
-    "Text": "Вы промахнулись"
+    "Text": "Элемент брошен мимо"
   },
   {
     "Id": "element_destroy",

@@ -1,11 +1,11 @@
 [
   {
     "Id": "element_add",
-    "Text": "You placed the element"
+    "Text": "Element added"
   },
   {
     "Id": "element_miss",
-    "Text": "You missed"
+    "Text": "Element drop missed"
   },
   {
     "Id": "element_destroy",

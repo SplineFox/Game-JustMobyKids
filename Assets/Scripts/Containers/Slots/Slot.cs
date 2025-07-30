@@ -1,14 +1,15 @@
-using System;
+using UniRx;
 using Zenject;
 using UnityEngine;
 
 public class Slot : ElementContainer
 {
-    public Action ElementDragBegin;
-    public Action ElementDragEnd;
+    public readonly Subject<Unit> OnInteractionBegin = new();
+    public readonly Subject<Unit> OnInteractionEnd = new();
     
     [SerializeField] private RectTransform _rectTransform;
     
+    private CompositeDisposable _elementSubscriptions = new();
     private ElementConfiguration _elementConfiguration;
     private ElementPool _elementPool;
     private Element _element;
@@ -31,9 +32,6 @@ public class Slot : ElementContainer
         _element.SetContainer(this);
         _element.CanBeDestroyed = false;
         
-        _element.DragBegin += ElementDragBegin;
-        _element.DragEnd += ElementDragEnd;
-        
         _element.RectTransform.SetParent(_rectTransform);
         
         _element.RectTransform.offsetMin = Vector2.zero;
@@ -44,16 +42,26 @@ public class Slot : ElementContainer
         
         _element.RectTransform.localScale = Vector3.one;
         _element.RectTransform.sizeDelta = _rectTransform.sizeDelta;
+        
+        _elementSubscriptions.Clear();
+        
+        _element.OnDragBegin
+            .Subscribe(_ => OnInteractionBegin.OnNext(Unit.Default))
+            .AddTo(_elementSubscriptions);
+
+        _element.OnDragEnd
+            .Subscribe(_ => OnInteractionEnd.OnNext(Unit.Default))
+            .AddTo(_elementSubscriptions);
     }
 
     public override void RemoveElement(Element element)
     {
         if (_element != element)
             return;
-        
-        _element.DragBegin -= ElementDragBegin;
-        _element.DragEnd -= ElementDragEnd;
 
+        _element = null;
+        _elementSubscriptions.Clear();
+        
         SpawnElement(true);
     }
 

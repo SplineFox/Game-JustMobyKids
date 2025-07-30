@@ -15,7 +15,6 @@ public class GameInstaller : MonoInstaller
     [Header("Scene dependencies")]
     [SerializeField] private Hole _hole;
     [SerializeField] private Tower _tower;
-    [SerializeField] private ScrollArea _scrollArea;
     [SerializeField] private ElementGhost _elementGhost;
     [SerializeField] private DragDropService _dragDropService;
     
@@ -61,7 +60,6 @@ public class GameInstaller : MonoInstaller
     {
         Container.BindInterfacesAndSelfTo<Hole>().FromInstance(_hole);
         Container.BindInterfacesAndSelfTo<Tower>().FromInstance(_tower);
-        Container.BindInterfacesAndSelfTo<ScrollArea>().FromInstance(_scrollArea).AsSingle();
         Container.BindInterfacesAndSelfTo<ElementGhost>().FromInstance(_elementGhost).AsSingle();
         Container.BindInterfacesAndSelfTo<DragDropService>().FromInstance(_dragDropService).AsSingle();
     }

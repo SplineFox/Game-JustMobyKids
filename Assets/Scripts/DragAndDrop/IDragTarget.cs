@@ -1,13 +1,13 @@
 using System;
+using UniRx;
 using UnityEngine;
 
 public interface IDragTarget
 {
-    event Action DragBegin;
-    event Action DragEnd;
-    
+    IObservable<Unit> OnDragBegin { get; }
+    IObservable<Unit> OnDragEnd { get; }
+
     bool CanBeDragged { get; set; }
-    
     
     void OnGhostDragBegin();
     void OnGhostDragEnd();

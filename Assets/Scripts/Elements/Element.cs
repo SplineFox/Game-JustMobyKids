@@ -1,13 +1,14 @@
 using System;
 using Zenject;
 using DG.Tweening;
+using UniRx;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class Element : MonoBehaviour, IDragTarget
 {
-    public event Action DragBegin;
-    public event Action DragEnd;
+    private readonly Subject<Unit> _onDragBegin = new();
+    private readonly Subject<Unit> _onDragEnd = new();
 
     [SerializeField] private RectTransform _rectTransform;
     [SerializeField] private Image _image;
@@ -19,6 +20,8 @@ public class Element : MonoBehaviour, IDragTarget
 
     public bool CanBeDestroyed { get; set; }
     public bool CanBeDragged { get; set; }
+    public IObservable<Unit> OnDragBegin => _onDragBegin;
+    public IObservable<Unit> OnDragEnd => _onDragEnd;
     public RectTransform RectTransform => _rectTransform;
     public ElementConfiguration Configuration => _configuration;
 
@@ -72,13 +75,13 @@ public class Element : MonoBehaviour, IDragTarget
     public void OnGhostDragBegin()
     {
         _image.color = new Color(_image.color.r, _image.color.g, _image.color.b, 0.5f);
-        DragBegin?.Invoke();
+        _onDragBegin.OnNext(Unit.Default);
     }
 
     public void OnGhostDragEnd()
     {
         _image.color = new Color(_image.color.r, _image.color.g, _image.color.b, 1f);
-        DragEnd?.Invoke();
+        _onDragEnd.OnNext(Unit.Default);
     }
 
     public GameObject GetDraggableGhost()

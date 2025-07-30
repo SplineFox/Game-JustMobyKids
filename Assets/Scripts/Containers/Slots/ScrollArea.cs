@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
+using UniRx;
 using Zenject;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ScrollArea : MonoBehaviour, IInitializable, IDisposable
+public class ScrollArea : MonoBehaviour
 {
     [SerializeField] private ScrollRect _scrollRect;
     
@@ -20,7 +21,7 @@ public class ScrollArea : MonoBehaviour, IInitializable, IDisposable
         _slotFactory = slotFactory;
     }
     
-    public void Initialize()
+    public void Start()
     {
         foreach (var configuration in _gameConfiguration.Configurations)
         {
@@ -29,29 +30,10 @@ public class ScrollArea : MonoBehaviour, IInitializable, IDisposable
             slot.transform.SetParent(transform);
             slot.transform.localScale = Vector3.one;
             
-            slot.ElementDragBegin += OnDragBegin;
-            slot.ElementDragEnd += OnDragEnd;
+            slot.OnInteractionBegin.Subscribe(_ => _scrollRect.enabled = false).AddTo(this);
+            slot.OnInteractionEnd.Subscribe(_ => _scrollRect.enabled = true).AddTo(this);
             
             _slots.Add(slot);
         }
-    }
-
-    public void Dispose()
-    {
-        foreach (var slot in _slots)
-        {
-            slot.ElementDragBegin -= OnDragBegin;
-            slot.ElementDragEnd -= OnDragEnd;
-        }
-    }
-
-    private void OnDragBegin()
-    {
-        _scrollRect.enabled = false;
-    }
-
-    private void OnDragEnd()
-    {
-        _scrollRect.enabled = true;
     }
 }
